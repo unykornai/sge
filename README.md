@@ -1,10 +1,10 @@
-﻿<div align="center">
+<div align="center">
 
 # ⚡ SGE Energy (SGE) Mainnet Claim System
 
 **Enterprise-grade token claim platform with gasless registration and multi-token support**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-22c55e.svg)](https://github.com/unykornai/sge#license)
 [![Network: Ethereum Mainnet](https://img.shields.io/badge/Network-Ethereum%20Mainnet-3b82f6.svg)](https://ethereum.org)
 [![Solidity: 0.8.23](https://img.shields.io/badge/Solidity-0.8.23-f59e0b.svg)](https://soliditylang.org)
 [![CI](https://github.com/unykornai/sge/actions/workflows/ci.yml/badge.svg)](https://github.com/unykornai/sge/actions/workflows/ci.yml)
@@ -568,4 +568,30 @@ This is a **production-ready** system currently deployed on Ethereum mainnet. Se
 
 ## License
 
-MIT
+**Dual-licensed** under your choice of:
+
+- [MIT License](./LICENSE-MIT)
+- [Apache License 2.0](./LICENSE-APACHE)
+
+See [LICENSES.md](./LICENSES.md) for details.
+
+### Why Dual License?
+
+- **MIT**: Simple, permissive, maximum compatibility
+- **Apache 2.0**: Adds explicit patent grant and patent retaliation protection
+
+Choose whichever works best for your project.
+
+### Trademarks
+
+Code license does NOT grant rights to "SGE," "SGE Energy," or related trademarks. See [TRADEMARKS.md](./TRADEMARKS.md) for brand usage policy.
+
+### Contributing
+
+By contributing, you agree your code will be dual-licensed (MIT + Apache 2.0) and you certify the [Developer Certificate of Origin](./DCO.md). All commits **must include** `Signed-off-by` line:
+
+```bash
+git commit -s -m "feat: your feature"
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for full guidelines.

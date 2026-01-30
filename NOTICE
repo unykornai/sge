@@ -1,0 +1,43 @@
+SGE Energy Token Claim System
+Copyright 2024-2026 SGE Energy Contributors
+
+This product includes software developed by the SGE Energy project
+(https://github.com/unykornai/sge).
+
+Licensed under either of:
+ * MIT License (LICENSE-MIT or https://opensource.org/licenses/MIT)
+ * Apache License, Version 2.0 (LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0)
+
+at your option.
+
+================================================================================
+
+This project includes components from the following open-source projects:
+
+Ethereum Ecosystem:
+- ethers.js (MIT License) - https://github.com/ethers-io/ethers.js
+- Hardhat (MIT License) - https://github.com/NomicFoundation/hardhat
+
+Web Framework:
+- Express (MIT License) - https://github.com/expressjs/express
+- React (MIT License) - https://github.com/facebook/react
+- Vite (MIT License) - https://github.com/vitejs/vite
+- VitePress (MIT License) - https://github.com/vuejs/vitepress
+
+For full dependency licenses, see node_modules/*/LICENSE files.
+
+================================================================================
+
+TRADEMARK NOTICE:
+
+"SGE," "SGE Energy," and associated logos are trademarks of SGE Energy.
+Use of these trademarks is subject to the terms in TRADEMARKS.md.
+This license does not grant rights to use SGE trademarks.
+
+================================================================================
+
+PATENT NOTICE (Apache 2.0):
+
+If you choose the Apache 2.0 license option, you receive an explicit patent
+grant from all contributors, with patent retaliation protection.
+See LICENSE-APACHE for details.

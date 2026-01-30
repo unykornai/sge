@@ -1,11 +1,11 @@
 # Interactive Demo
 
-<ClientOnly>
 <script setup>
 import InteractiveDemo from './InteractiveDemo.vue'
 </script>
 
-<InteractiveDemo />
+<ClientOnly>
+  <InteractiveDemo />
 </ClientOnly>
 
 ## How It Works
