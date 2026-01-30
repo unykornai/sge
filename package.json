@@ -15,7 +15,7 @@
     "lint": "echo 'Lint not configured yet'",
     "clean": "npm run clean -ws --if-present",
     "wallet:new": "node scripts/wallet-new.mjs",
-    "test": "npm run test -w @sge/contracts", "test:contracts": "npm test -w @sge/contracts"
+    "test": "npm run test -w @sge/contracts", "test:contracts": "npm test -w @sge/contracts", "test:contracts:raw": "npm run test:raw -w @sge/contracts"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

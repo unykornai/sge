@@ -1,40 +1,43 @@
 import { execSync } from "node:child_process";
 
-function run(cmd) {
-  return execSync(cmd, { stdio: "pipe", encoding: "utf8" });
+function runHardhat() {
+  const npx = process.platform === "win32" ? "npx.cmd" : "npx";
+  // stdio: pipe so we can inspect output and still print it ourselves
+  return execSync(`${npx} hardhat test`, { encoding: "utf8", stdio: "pipe" });
 }
 
 try {
-  // npx resolves correctly in workspaces; cmd name differs on Windows
-  const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-  const output = run(`${npx} hardhat test`);
-
-  // Print normal output
-  process.stdout.write(output);
-
-  // If we got here, exit code was 0
+  const out = runHardhat();
+  process.stdout.write(out);
   process.exit(0);
 } catch (e) {
   const stdout = e?.stdout?.toString?.() ?? "";
   const stderr = e?.stderr?.toString?.() ?? "";
-  const combined = (stdout + "\n" + stderr).toLowerCase();
+  const combined = `${stdout}\n${stderr}`;
 
-  // Always print what Hardhat printed
+  // Always print original output for visibility
   if (stdout) process.stdout.write(stdout);
   if (stderr) process.stderr.write(stderr);
 
-  const passed = /\bpassing\b/.test(combined) && !/\bfailing\b/.test(combined);
-  const windowsShutdownGlitch =
-    combined.includes("assertion failed") ||
-    combined.includes("async handle") ||
-    combined.includes("uv_loop") ||
-    combined.includes("terminate process");
+  const lower = combined.toLowerCase();
 
-  if (process.platform === "win32" && passed && windowsShutdownGlitch) {
-    console.warn("\n[hh-test] Windows shutdown glitch detected. Tests passed; forcing exit 0.\n");
+  // Only suppress when:
+  // 1) Windows
+  // 2) Hardhat clearly reported passing
+  // 3) The specific libuv shutdown assertion is present
+  const isWin = process.platform === "win32";
+  const hasPassingSummary = /\b\d+\s+passing\b/i.test(combined) && !/\b\d+\s+failing\b/i.test(combined);
+  const hasUvAssertion =
+    lower.includes("assertion failed") &&
+    lower.includes("uv_handle_closing") &&
+    lower.includes("src\\win\\async.c");
+
+  if (isWin && hasPassingSummary && hasUvAssertion) {
+    console.warn("\n[hh-test] Windows libuv shutdown assertion detected AFTER passing tests. Forcing exit 0.\n");
     process.exit(0);
   }
 
-  // Preserve real failures
-  process.exit(typeof e?.status === "number" ? e.status : 1);
+  // Real failures (or other errors) must fail
+  const status = typeof e?.status === "number" ? e.status : 1;
+  process.exit(status);
 }
