@@ -13,7 +13,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, Clock, XCircle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 
 interface ReconciliationMetrics {
   stuckIntents: StuckIntent[];

@@ -19,8 +19,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
 } from 'recharts';
 
 interface ReconciliationData {
@@ -259,7 +257,7 @@ export default function ReconciliationDashboard() {
               <YAxis stroke="#888" fontSize={12} label={{ value: 'Minutes', angle: -90, position: 'insideLeft' }} />
               <Tooltip
                 contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
-                formatter={(value: any, name: any, props: any) => [`${value} min`, props.payload.type]}
+                formatter={(value: any, _name: any, props: any) => [`${value} min`, props.payload.type]}
               />
               <Bar
                 dataKey="minutes"
@@ -282,7 +280,7 @@ export default function ReconciliationDashboard() {
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name}: ${(((percent ?? 0) * 100)).toFixed(0)}%`}
               >
                 {ledgerPieData.map((entry, index) => (
                   <Cell

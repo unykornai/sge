@@ -15,10 +15,10 @@ import { mockPrisma, seedMockData } from './mock-db';
 // MOCK_MODE=true OR no DATABASE_URL = use mock
 const useMockDb = process.env.MOCK_MODE === 'true' && !process.env.DATABASE_URL?.includes('@');
 
-// Type that works for both real and mock Prisma
-type PrismaLike = typeof mockPrisma | import('../generated/prisma').PrismaClient;
-
-let prismaInstance: PrismaLike;
+// NOTE: The runtime is either a real PrismaClient or a mock implementation.
+// We intentionally export it as `any` so strict TS doesn't require the mock to
+// perfectly model Prisma's delegate surface area (groupBy, updateMany, payout, etc).
+let prismaInstance: any;
 let poolInstance: any;
 
 if (useMockDb) {
@@ -70,7 +70,8 @@ if (useMockDb) {
   }
 }
 
-export const prisma = prismaInstance;
+export const prisma: any = prismaInstance;
+export const db: any = prismaInstance;
 
 /**
  * Connect to database

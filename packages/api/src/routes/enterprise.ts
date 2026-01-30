@@ -280,7 +280,7 @@ router.get('/intents', async (req: Request, res: Response) => {
  * Generate timeseries data for stats
  */
 async function generateTimeseries(programId: string | undefined, days: number) {
-  const data = [];
+  const data: any[] = [];
   const now = new Date();
 
   for (let i = days - 1; i >= 0; i--) {

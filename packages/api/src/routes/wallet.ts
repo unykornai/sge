@@ -132,7 +132,7 @@ router.get('/wallet/nft', async (req: Request, res: Response) => {
       const balance = await sgeid.balanceOf(checksummed);
       const hasNft = balance > 0;
 
-      let tokenId = null;
+      let tokenId: number | null = null;
       if (hasNft) {
         // Get first token owned
         tokenId = Number(await sgeid.tokenOfOwnerByIndex(checksummed, 0));

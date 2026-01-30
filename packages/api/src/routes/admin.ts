@@ -284,7 +284,7 @@ router.get('/admin/stats/timeseries', adminAuth, async (req: Request, res: Respo
  * Mock time-series data generator
  */
 function getMockTimeSeriesStats(days: number) {
-  const timeseries = [];
+  const timeseries: any[] = [];
   const today = new Date();
 
   for (let i = days - 1; i >= 0; i--) {

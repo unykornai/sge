@@ -142,7 +142,7 @@ async function findStuckIntents() {
  */
 async function checkLedgerBalances() {
   const programs = await db.program.findMany();
-  const imbalances = [];
+    const imbalances: any[] = [];
 
   for (const program of programs) {
     // Sum all debits (settlements)
@@ -202,7 +202,7 @@ async function reconcileProgram(programId: string) {
   });
 
   let balance = 0;
-  const errors = [];
+    const errors: any[] = [];
 
   for (const entry of entries) {
     if (entry.type === 'debit') {

@@ -119,7 +119,8 @@ export const handlers = [
   // Coinbase Commerce
   // =========================================================================
   http.post('*/api/commerce/charge', async ({ request }) => {
-    const body = await request.json() as any;
+    // Consume request body for realism, but we don't need its fields in demo mode.
+    await request.json().catch(() => undefined);
     const chargeId = `demo-charge-${demoState.chargeCounter++}`;
 
     return HttpResponse.json(await withDelay({
@@ -191,7 +192,7 @@ export const handlers = [
   }),
 
   http.post('*/api/claim/prepare', async ({ request }) => {
-    const body = await request.json() as any;
+    await request.json().catch(() => undefined);
     
     return HttpResponse.json(await withDelay({
       success: true,
@@ -208,14 +209,14 @@ export const handlers = [
   }),
 
   http.post('*/api/claim/record', async ({ request }) => {
-    const body = await request.json() as any;
+    const body = (await request.json()) as { wallet?: string; amount?: unknown; txHash?: string };
     const claimId = generateId('claim');
 
     demoState.claims.set(claimId, {
       id: claimId,
-      wallet: body.wallet,
-      amount: body.amount,
-      txHash: body.txHash,
+      wallet: body.wallet ?? '0x0000000000000000000000000000000000000000',
+      amount: String(body.amount ?? '0'),
+      txHash: String(body.txHash ?? '0x'),
       timestamp: new Date().toISOString(),
     });
 

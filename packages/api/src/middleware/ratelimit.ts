@@ -48,5 +48,14 @@ export function rateLimit(rule: Rule, keyer: Keyer, opts: Opts) {
 }
 
 // common keyers
-export const byIp: Keyer = (req) => (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip;
+export const byIp: Keyer = (req) => {
+  const xff = req.headers['x-forwarded-for'];
+  if (typeof xff === 'string' && xff.length) {
+    return xff.split(',')[0]?.trim() || req.ip || 'unknown';
+  }
+  if (Array.isArray(xff) && xff.length) {
+    return String(xff[0]).split(',')[0]?.trim() || req.ip || 'unknown';
+  }
+  return req.ip || 'unknown';
+};
 export const byWallet: Keyer = (req) => (req.body?.wallet as string) || (req.query?.wallet as string) || "no-wallet";

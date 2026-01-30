@@ -10,6 +10,7 @@
 
 import { redis, isMockRedis } from './redis';
 import { logger } from './logger';
+import type { Queue } from 'bullmq';
 import { MockQueue, MockWorker } from './mock-queue';
 
 // Queue names

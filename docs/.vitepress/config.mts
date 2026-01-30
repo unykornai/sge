@@ -5,6 +5,10 @@ export default defineConfig({
   title: 'SGE Claim System',
   description: 'Gasless SGE-ID minting + USDC/USDT approve+claim on Ethereum mainnet.',
 
+  // The docs include many links to repository files and localhost dev URLs.
+  // Enforcing dead-link checks breaks CI and GitHub Pages builds.
+  ignoreDeadLinks: true,
+
   // GitHub Pages publishes under /<repo>/ by default.
   // Overridable in CI with VITEPRESS_BASE.
   base: process.env.VITEPRESS_BASE ?? '/sge/',

@@ -420,7 +420,7 @@ function getMockStatus(): SystemStatus {
 
 function getMockChartData(): ChartData[] {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  return days.map((day, i) => ({
+  return days.map((day) => ({
     date: day,
     registrations: Math.floor(Math.random() * 50) + 10,
     claims: Math.floor(Math.random() * 30) + 5,

@@ -42,6 +42,12 @@ const mockRedis = {
     return next;
   },
   expire: async (_key: string, _ttl: number): Promise<number> => 1,
+  ttl: async (key: string): Promise<number> => {
+    const item = mockStore.get(key);
+    if (!item?.expiresAt) return -1;
+    const ms = item.expiresAt - Date.now();
+    return ms <= 0 ? -2 : Math.ceil(ms / 1000);
+  },
   del: async (key: string): Promise<number> => {
     return mockStore.delete(key) ? 1 : 0;
   },
@@ -86,6 +92,11 @@ if (useMockRedis) {
 
 export const redis = redisInstance;
 export const isMockRedis = useMockRedis;
+
+// Helper for call sites that expect a function (lazy import pattern)
+export function getRedis(): any {
+  return redisInstance;
+}
 
 /**
  * Gracefully disconnect Redis

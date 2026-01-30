@@ -145,7 +145,7 @@ export const mockPrisma = {
   },
   $transaction: async (operations: any[]) => {
     // Execute all operations in sequence
-    const results = [];
+    const results: any[] = [];
     for (const op of operations) {
       if (typeof op === 'function') {
         results.push(await op(mockPrisma));

@@ -83,7 +83,7 @@ export async function registerAffiliate(
   }
 
   // Find parent affiliate if code provided
-  let parentAffiliate = null;
+  let parentAffiliate: any | null = null;
   let depth = 1;
 
   if (parentCode) {

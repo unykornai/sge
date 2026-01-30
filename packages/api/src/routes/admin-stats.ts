@@ -145,7 +145,7 @@ async function getTopAffiliates() {
  * Mock data for MOCK_MODE or demo purposes
  */
 function getMockStats(days: number) {
-  const timeseries = [];
+  const timeseries: any[] = [];
   const today = new Date();
 
   for (let i = days - 1; i >= 0; i--) {
