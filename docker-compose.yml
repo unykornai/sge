@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: sge-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    env_file:
+      - ./packages/api/.env.production
+    volumes:
+      - api-data:/app/packages/api/data
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sge-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+      args:
+        - VITE_ETH_RPC_HTTPS=${VITE_ETH_RPC_HTTPS}
+        - VITE_SGE_TOKEN=${VITE_SGE_TOKEN:-0x40489719E489782959486A04B765E1E93E5B221a}
+        - VITE_SGE_CLAIM=${VITE_SGE_CLAIM:-0x4BFeF695a5f85a65E1Aa6015439f317494477D09}
+        - VITE_USDC=${VITE_USDC:-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48}
+        - VITE_USDT=${VITE_USDT:-0xdAC17F958D2ee523a2206206994597C13D831ec7}
+        - VITE_FEE_USD=${VITE_FEE_USD:-100}
+        - VITE_WALLETCONNECT_PROJECT_ID=${VITE_WALLETCONNECT_PROJECT_ID}
+    container_name: sge-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - sge-network
+
+volumes:
+  api-data:
+
+networks:
+  sge-network:
+    driver: bridge

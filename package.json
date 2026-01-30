@@ -1,0 +1,28 @@
+{
+  "name": "sge-eth-one-swoop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SGE Energy - Ethereum mainnet gasless minting and claim system",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm:dev -w @sge/api\" \"npm:dev -w @sge/app\"",
+    "build": "npm run build -w @sge/shared && npm run build -w @sge/contracts && npm run build -w @sge/api && npm run build -w @sge/app",
+    "build:shared": "npm run build -w @sge/shared",
+    "build:contracts": "npm run build -w @sge/contracts",
+    "build:api": "npm run build -w @sge/api",
+    "build:app": "npm run build -w @sge/app",
+    "typecheck": "tsc -b",
+    "lint": "echo 'Lint not configured yet'",
+    "clean": "npm run clean -ws --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
