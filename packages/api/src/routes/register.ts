@@ -11,6 +11,7 @@ const router = Router();
 
 const registerSchema = z.object({
   wallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address'),
+  referrer: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address').optional(),
 });
 
 router.post('/register', requireKyc, async (req: Request, res: Response) => {
@@ -25,6 +26,7 @@ router.post('/register', requireKyc, async (req: Request, res: Response) => {
     }
     
     const { wallet } = parsed.data;
+    const referrer = (parsed.data as any).referrer as string | undefined;
     const checksummedWallet = checksumAddress(wallet);
     
     // Check Commerce payment gate
@@ -42,6 +44,15 @@ router.post('/register', requireKyc, async (req: Request, res: Response) => {
     const result = await mintTo(checksummedWallet);
     
     logger.info({ wallet: checksummedWallet, tokenId: result.tokenId }, 'Register successful');
+    // If referrer provided, enqueue register job for off-chain relayer
+    if (referrer) {
+      try {
+        const { enqueueRegisterPg } = await import('../lib/jobQueuePg');
+        await enqueueRegisterPg(checksummedWallet, checksumAddress(referrer));
+      } catch (e: any) {
+        logger.warn({ err: e.message, wallet: checksummedWallet, referrer }, 'Failed to enqueue register job (pg)');
+      }
+    }
     
     res.json({
       tokenId: result.tokenId,

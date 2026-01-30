@@ -5,6 +5,7 @@ import { initEvm } from './services/evm';
 import { verifyOwnership } from './services/sgeid';
 import { connectDatabase, disconnectDatabase } from './lib/db';
 import { disconnectRedis } from './lib/redis';
+import jobsRouter from './routes/jobs';
 import { startWorkers, stopWorkers, scheduleRecurringJobs } from './workers';
 
 // Phase 2: OpenTelemetry (REAL mode only)
@@ -49,6 +50,8 @@ async function main() {
 
     // Create Express server
     const app = createServer();
+    // Mount admin job routes (enterprise only)
+    if (isEnterpriseMode) app.use('/api', jobsRouter);
 
     // Start server
     app.listen(env.PORT, () => {

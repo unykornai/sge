@@ -2,6 +2,8 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { env } from '../env';
 import { logger } from './logger';
 import { upsertByKey, hasKey } from './storage';
+import { getReferrer, payAffiliateUSDC } from '../lib/relayer';
+import { ethers } from 'ethers';
 
 const PAYMENTS_FILE = 'payments.json';
 const WEBHOOKS_FILE = 'webhooks.json';
@@ -105,6 +107,30 @@ export async function processWebhookEvent(event: CommerceEvent): Promise<void> {
     chargeId,
     amountUSD,
   }, 'Payment marked as paid');
+
+  // If this payment is for a wallet and there's a configured affiliate payout, attempt to pay affiliate
+  try {
+    if (/^0x[a-fA-F0-9]{40}$/i.test(walletOrEmail)) {
+      const child = ethers.getAddress(walletOrEmail);
+      const ref = await getReferrer(child);
+      if (ref && ref !== ethers.ZeroAddress) {
+        const usdcAmountEnv = env.AFFILIATE_USDC_AMOUNT || '0';
+        // If an amount is configured (in smallest USDC unit), trigger payout
+        if (usdcAmountEnv !== '0') {
+          const usdcAmount = BigInt(usdcAmountEnv);
+          const usdcToken = env.USDC;
+          try {
+            const { enqueuePayoutPg } = await import('../lib/jobQueuePg');
+            await enqueuePayoutPg(child, ref, usdcAmount.toString(), usdcToken);
+          } catch (e: any) {
+            logger.error({ err: e.message, child, ref }, 'Failed to enqueue payout job (pg)');
+          }
+        }
+      }
+    }
+  } catch (e: any) {
+    logger.warn({ err: e.message, walletOrEmail }, 'Affiliate payout attempt failed');
+  }
 }
 
 /**

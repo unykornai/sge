@@ -6,7 +6,7 @@ Complete visual guide to the SGE multi-tenant settlement platform.
 
 ## What is SGE?
 
-**SGE (Sustainable Green Energy)** is a multi-tenant settlement platform for managing token distributions with perfect settlement guarantees.
+**SGE (SuperGreen Energy)** is a multi-tenant settlement platform for managing token distributions with perfect settlement guarantees.
 
 ### Core Value Propositions
 

@@ -73,6 +73,10 @@ export const env = {
   COINBASE_COMMERCE_API_KEY: optionalEnv('COINBASE_COMMERCE_API_KEY'),
   COINBASE_COMMERCE_WEBHOOK_SHARED_SECRET: optionalEnv('COINBASE_COMMERCE_WEBHOOK_SHARED_SECRET'),
 
+  // Affiliate payouts (optional)
+  AFFILIATE_USDC_AMOUNT: optionalEnv('AFFILIATE_USDC_AMOUNT', '0'), // amount in USDC smallest unit (e.g., 100 = $100 for 6 decimals requires '100000000')
+  AFFILIATE_SGE_AMOUNT: optionalEnv('AFFILIATE_SGE_AMOUNT', '0'),
+
   // Rate Limiting (Phase 2)
   RL_REGISTER_PER_HOUR: parseInt(process.env.RL_REGISTER_PER_HOUR || '5', 10),
   RL_REGISTER_PER_DAY_WALLET: parseInt(process.env.RL_REGISTER_PER_DAY_WALLET || '10', 10),

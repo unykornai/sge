@@ -37,7 +37,8 @@
     "prisma:studio": "npm run prisma:studio -w @sge/api",
     "setup": "npm install && npm run build:shared && npm run prisma:generate",
     "setup:real": "npm install && npm run db:up && sleep 5 && npm run prisma:push && npm run prisma:generate && npm run build:shared",
-    "bootstrap": "node scripts/bootstrap.sh"
+    "bootstrap": "node scripts/bootstrap.sh",
+    "dev:ensure": "powershell -ExecutionPolicy Bypass -File scripts/ensure-dev.ps1 -KillExisting"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
