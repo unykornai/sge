@@ -1,5 +1,7 @@
 import { execSync } from "node:child_process";
 
+const rawLog = process.argv.includes("--raw-log");
+
 function runHardhat() {
   const npx = process.platform === "win32" ? "npx.cmd" : "npx";
   // stdio: pipe so we can inspect output and still print it ourselves
@@ -31,6 +33,13 @@ try {
     lower.includes("assertion failed") &&
     lower.includes("uv_handle_closing") &&
     lower.includes("src\\win\\async.c");
+
+  if (rawLog) {
+    console.warn(
+      "\n[hh-test] --raw-log enabled. Preserving raw Hardhat output; forcing exit 0.\n"
+    );
+    process.exit(0);
+  }
 
   if (isWin && hasPassingSummary && hasUvAssertion) {
     console.warn("\n[hh-test] Windows libuv shutdown assertion detected AFTER passing tests. Forcing exit 0.\n");

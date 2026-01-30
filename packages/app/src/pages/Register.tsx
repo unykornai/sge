@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { isAddress } from 'viem';
-import { etherscanTx } from '@sge/shared';
 
 export default function Register() {
   const { address, isConnected } = useAccount();

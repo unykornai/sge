@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useChainId, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSimulateContract } from 'wagmi';
-import { parseUnits, type Address } from 'viem';
+import { type Address } from 'viem';
 import { erc20Abi, claimAbi, FEE_6_DECIMALS } from '@sge/shared';
 import { env } from '../config';
 import AtomicFallback from '../components/AtomicFallback';
@@ -32,7 +32,7 @@ export default function Claim() {
 
   const currentAllowance = allowance as bigint | undefined;
   const needsApproval = !currentAllowance || currentAllowance < FEE_6_DECIMALS;
-  const needsReset = selectedToken === 'USDT' && currentAllowance && currentAllowance > 0n && currentAllowance < FEE_6_DECIMALS;
+  const needsReset = selectedToken === 'USDT' && !!currentAllowance && currentAllowance > 0n && currentAllowance < FEE_6_DECIMALS;
 
   // Approve hooks
   const { writeContract: approve, data: approveHash } = useWriteContract();

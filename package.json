@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "SGE Energy - Ethereum mainnet gasless minting and claim system",
-  "workspaces": ["packages/*"],
+  "workspaces": ["packages/*", "docs"],
   "scripts": {
     "dev": "concurrently \"npm:dev -w @sge/api\" \"npm:dev -w @sge/app\"",
     "build": "npm run build -w @sge/shared && npm run build -w @sge/contracts && npm run build -w @sge/api && npm run build -w @sge/app",
@@ -15,7 +15,14 @@
     "lint": "echo 'Lint not configured yet'",
     "clean": "npm run clean -ws --if-present",
     "wallet:new": "node scripts/wallet-new.mjs",
-    "test": "npm run test -w @sge/contracts", "test:contracts": "npm test -w @sge/contracts", "test:contracts:raw": "npm run test:raw -w @sge/contracts"
+    "test": "npm run test -w @sge/contracts",
+    "test:contracts": "npm test -w @sge/contracts",
+    "test:contracts:raw": "npm run test:raw -w @sge/contracts",
+    "test:contracts:raw:log": "npm run test:raw:log -w @sge/contracts",
+    "test:ci": "npm test -w @sge/contracts && npm test -w @sge/api && npm test -w @sge/app",
+    "docs:dev": "npm run dev -w @sge/docs",
+    "docs:build": "npm run build -w @sge/docs",
+    "docs:preview": "npm run preview -w @sge/docs"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

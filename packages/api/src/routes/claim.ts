@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { ethers } from 'ethers';
-import { sgeClaimAbi, erc20Abi } from '@sge/shared';
+import { claimAbi, erc20Abi } from '@sge/shared';
 import { provider, checksumAddress, etherscanTx } from '../services/evm';
 import { env } from '../env';
 import { logger } from '../services/logger';
@@ -49,7 +49,7 @@ router.get('/claim/info', async (req: Request, res: Response) => {
     const sgeBalance = await sgeToken.balanceOf(checksummed);
 
     // Get claim contract info
-    const claimContract = new ethers.Contract(env.SGE_CLAIM, sgeClaimAbi, provider);
+    const claimContract = new ethers.Contract(env.SGE_CLAIM, claimAbi, provider);
     
     let claimableAmount = BigInt(0);
     let hasClaimed = false;
@@ -161,7 +161,7 @@ router.post('/claim/prepare', async (req: Request, res: Response) => {
     }
 
     // Step 3: Claim (always last)
-    const claimIface = new ethers.Interface(sgeClaimAbi);
+    const claimIface = new ethers.Interface(claimAbi);
     response.transactions.push({
       step: response.transactions.length + 1,
       description: 'Claim SGE tokens',

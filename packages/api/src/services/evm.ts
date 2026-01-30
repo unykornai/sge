@@ -81,6 +81,14 @@ export async function initEvm(): Promise<void> {
     signer: signerAddress,
     balance: ethers.formatEther(balance),
   }, 'EVM service initialized');
+
+  if (!/^0x0{40}$/i.test(env.SGEID_ADDRESS)) {
+    const sgeidCode = await provider.getCode(env.SGEID_ADDRESS);
+    const hasSgeidCode = sgeidCode !== '0x' && sgeidCode.length > 2;
+    if (!hasSgeidCode) {
+      logger.warn({ sgeidAddress: env.SGEID_ADDRESS }, 'SGEID contract not deployed (no code) - API will run in LIMITED MODE');
+    }
+  }
   
   if (balance < ethers.parseEther('0.01')) {
     logger.warn('⚠️  Relayer balance is low! Ensure sufficient ETH for gas.');

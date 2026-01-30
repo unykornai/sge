@@ -5,7 +5,9 @@
   "description": "SGE-ID NFT smart contract (Hardhat)",
   "scripts": {
     "compile": "hardhat compile",
-    "test": "node ./scripts/hh-test-windows.mjs", "test:raw": "hardhat test",
+    "test": "node ./scripts/hh-test-windows.mjs",
+    "test:raw": "hardhat test",
+    "test:raw:log": "node ./scripts/hh-test-windows.mjs --raw-log",
     "test:coverage": "hardhat coverage",
     "deploy:mainnet": "hardhat run scripts/deploy-sgeid.ts --network mainnet",
     "clean": "hardhat clean"

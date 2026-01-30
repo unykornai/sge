@@ -1,0 +1,43 @@
+:root {
+  --vp-c-brand-1: #22c55e;
+  --vp-c-brand-2: #16a34a;
+  --vp-c-brand-3: #15803d;
+
+  --sge-blue: #2563eb;
+  --sge-amber: #f59e0b;
+  --sge-rose: #f43f5e;
+}
+
+/* “Color-coded” callouts used throughout docs */
+.sge-card {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: var(--vp-c-bg-soft);
+}
+
+.sge-kpi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.sge-kpi > div {
+  border-radius: 14px;
+  border: 1px solid var(--vp-c-divider);
+  padding: 12px 14px;
+  background: var(--vp-c-bg-soft);
+}
+
+.sge-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px solid var(--vp-c-divider);
+}
+
+.sge-pill.blue { background: color-mix(in srgb, var(--sge-blue) 12%, transparent); border-color: color-mix(in srgb, var(--sge-blue) 35%, var(--vp-c-divider)); }
+.sge-pill.amber { background: color-mix(in srgb, var(--sge-amber) 12%, transparent); border-color: color-mix(in srgb, var(--sge-amber) 35%, var(--vp-c-divider)); }
+.sge-pill.rose { background: color-mix(in srgb, var(--sge-rose) 12%, transparent); border-color: color-mix(in srgb, var(--sge-rose) 35%, var(--vp-c-divider)); }

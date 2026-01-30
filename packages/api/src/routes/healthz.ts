@@ -13,17 +13,28 @@ router.get('/healthz', async (req: Request, res: Response) => {
     
     let signerAddress = 'NOT_CONFIGURED';
     let sgeidOwner = 'NOT_CONFIGURED';
+    let hasSgeidCode = false;
     
     try {
       signerAddress = await getSigner().getAddress();
+
+      // Verify SGEID has code (contract deployed) before calling owner()
+      if (!/^0x0{40}$/i.test(env.SGEID_ADDRESS)) {
+        const sgeidCode = await provider.getCode(env.SGEID_ADDRESS);
+        hasSgeidCode = sgeidCode !== '0x' && sgeidCode.length > 2;
+      }
       
       // Verify SGEID contract
-      const sgeidContract = new (await import('ethers')).ethers.Contract(
-        env.SGEID_ADDRESS,
-        sgeidAbi,
-        provider
-      );
-      sgeidOwner = await sgeidContract.owner();
+      if (hasSgeidCode) {
+        const sgeidContract = new (await import('ethers')).ethers.Contract(
+          env.SGEID_ADDRESS,
+          sgeidAbi,
+          provider
+        );
+        sgeidOwner = await sgeidContract.owner();
+      } else {
+        sgeidOwner = 'NOT_DEPLOYED';
+      }
     } catch (e: any) {
       logger.warn(`Health check signer error: ${e.message}`);
     }
@@ -32,7 +43,7 @@ router.get('/healthz', async (req: Request, res: Response) => {
     const claimCode = await provider.getCode(env.SGE_CLAIM);
     const hasClaimCode = claimCode !== '0x' && claimCode.length > 2;
     
-    const ok = network.chainId === 1n && hasClaimCode;
+    const ok = network.chainId === 1n && hasClaimCode && hasSgeidCode;
     
     const health = {
       ok,
@@ -43,6 +54,7 @@ router.get('/healthz', async (req: Request, res: Response) => {
       sgeidOwner,
       claimAddress: env.SGE_CLAIM,
       hasClaimCode,
+      hasSgeidCode,
     };
     
     if (!ok) {

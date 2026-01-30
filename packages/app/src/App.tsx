@@ -1,5 +1,5 @@
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 import Register from './pages/Register';
 import Claim from './pages/Claim';
 import Header from './components/Header';

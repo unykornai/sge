@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a defect or regression
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please include enough detail for fast reproduction.
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, npm version
+      placeholder: Windows 11 / Node 20.x / npm 10.x
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: Include expected vs actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Paste logs (redact secrets)
+      render: shell
+    validations:
+      required: false

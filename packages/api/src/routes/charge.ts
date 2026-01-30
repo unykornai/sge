@@ -72,7 +72,7 @@ router.post('/commerce/charge', async (req: Request, res: Response) => {
       });
     }
 
-    const result = await response.json();
+    const result = (await response.json()) as { data: any };
     const charge = result.data;
 
     logger.info({
@@ -120,7 +120,7 @@ router.get('/commerce/charge/:code', async (req: Request, res: Response) => {
       throw new Error(`API error: ${response.status}`);
     }
 
-    const result = await response.json();
+    const result = (await response.json()) as { data: any };
     const charge = result.data;
 
     // Determine status from timeline

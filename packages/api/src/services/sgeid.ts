@@ -24,6 +24,21 @@ function getContract() {
  * Verify relayer owns the SGEID contract
  */
 export async function verifyOwnership(): Promise<void> {
+  if (/^0x0{40}$/i.test(env.SGEID_ADDRESS)) {
+    throw new Error(
+      'SGEID_ADDRESS is the zero address. Configure a deployed SGEID contract address in .env'
+    );
+  }
+
+  const code = await provider.getCode(env.SGEID_ADDRESS);
+  const hasCode = code !== '0x' && code.length > 2;
+  if (!hasCode) {
+    throw new Error(
+      `SGEID_ADDRESS has no contract code on-chain: ${env.SGEID_ADDRESS}. ` +
+      `Check your .env and ETH_RPC_HTTPS network.`
+    );
+  }
+
   const contract = getContract();
   const owner = await contract.owner();
   const signerAddress = await getSigner().getAddress();

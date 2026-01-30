@@ -11,6 +11,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Network: Ethereum Mainnet](https://img.shields.io/badge/Network-Ethereum%20Mainnet-blue.svg)](https://ethereum.org)
 [![Solidity: 0.8.23](https://img.shields.io/badge/Solidity-0.8.23-orange.svg)](https://soliditylang.org)
+[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-0aa2ff.svg)](https://unykornai.github.io/sge/)
+[![CI](https://github.com/unykornai/sge/actions/workflows/ci.yml/badge.svg)](https://github.com/unykornai/sge/actions/workflows/ci.yml)
+
+Docs demo (GitHub Pages): https://unykornai.github.io/sge/
 
 ---
 
@@ -34,6 +38,17 @@ A production-lean monorepo for the full SGE claim surface:
   Everything is pinned to `chainId = 1`.
 
 ---
+
+## Table of contents
+
+- [![Start](https://img.shields.io/badge/START-Quickstart-22c55e.svg)](#quick-start-complete-runnable-steps) [![Docs](https://img.shields.io/badge/DOCS-Site-7c3aed.svg)](#docs-site) [![Arch](https://img.shields.io/badge/ARCH-Flows-2563eb.svg)](#architecture) [![Ops](https://img.shields.io/badge/OPS-Runbook-f59e0b.svg)](#runbook)
+
+- [Repository layout](#repository-layout)
+- [Quick start](#quick-start-complete-runnable-steps)
+- [Testing](#testing)
+- [Docs site](#docs-site)
+- [Architecture](#architecture)
+- [Runbook](#runbook)
 
 ## Repository layout
 
@@ -63,11 +78,14 @@ sge-eth-one-swoop/
 * npm 9+
 * Ethereum mainnet RPC URL (Alchemy, Infura, etc.)
 
+- **Docs:** https://unykornai.github.io/sge/
+- **Status:** [STATUS.md](./STATUS.md)
+
 ### Step 1: Generate wallets
 
-`ash
+```bash
 npm run wallet:new
-`
+```
 
 This prints **DEPLOYER** and **RELAYER** wallet addresses + private keys.
 Copy the output and paste into `packages/api/.env`.
@@ -76,16 +94,16 @@ Copy the output and paste into `packages/api/.env`.
 
 ### Step 2: Install dependencies
 
-`ash
+```bash
 npm install
-`
+```
 
 ### Step 3: Configure environment
 
-`ash
+```bash
 cp packages/api/.env.example packages/api/.env
 cp packages/app/.env.example packages/app/.env.local
-`
+```
 
 Edit `packages/api/.env` with:
 - Your Alchemy/Infura RPC URL
@@ -94,18 +112,18 @@ Edit `packages/api/.env` with:
 
 ### Step 4: Build shared package
 
-`ash
+```bash
 npm run build -w @sge/shared
-`
+```
 
 ### Step 5: Deploy SGEID contract (optional - needs funded deployer)
 
-`ash
+```bash
 cd packages/contracts
 cp .env.example .env
 # Edit .env with your RPC URL and DEPLOYER_PRIVATE_KEY
 npm run deploy:mainnet
-`
+```
 
 Copy the printed `SGEID_ADDRESS` into `packages/api/.env`.
 
@@ -116,15 +134,55 @@ This wallet pays gas for gasless NFT minting.
 
 ### Step 7: Start development servers
 
-`ash
+```bash
 npm run dev
-`
+```
 
 ### Dev URLs
 
 * **App**: [http://localhost:5173](http://localhost:5173)
 * **API**: [http://localhost:3000](http://localhost:3000)
 * **Health**: [http://localhost:3000/healthz](http://localhost:3000/healthz)
+
+---
+
+## Testing
+
+- `npm test` (or `npm run test:contracts`) is the CI-safe “did tests pass?” command.
+- `npm run test:ci` runs contracts tests plus TypeScript typechecks for `@sge/api` and `@sge/app`.
+- On Windows, the contracts test uses a wrapper that suppresses a known Hardhat/libuv shutdown assertion *only when the output summary shows passing*.
+- Use `npm run test:contracts:raw` to run raw Hardhat tests (may exit non-zero on Windows even after “X passing”).
+
+---
+
+## Docs site
+
+This repo ships a professional docs website (VitePress) with flow diagrams, flow trees, and operational pages.
+
+```bash
+npm install
+npm run docs:dev
+```
+
+- Local docs: `http://localhost:5173` (VitePress will pick the next available port)
+- Build: `npm run docs:build`
+
+For GitHub Pages deployment, the site is configured to publish under `/sge/`.
+
+### GitHub Pages setup
+
+1. In GitHub: **Settings → Pages**
+2. Under **Build and deployment**, choose **GitHub Actions**
+3. Merge to `main` and the workflow will publish the docs site
+
+Published URL:
+- `https://unykornai.github.io/sge/`
+
+---
+
+## Runbook
+
+- See `docs/ops/runbook.md` in the docs site navigation.
 
 ---
 
