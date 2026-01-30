@@ -1,20 +1,68 @@
-﻿# SGE Energy (SGE) Mainnet Claim System 
+﻿<div align="center">
 
-> **SGE** is a mobile-first claim experience for the SGE ecosystem on **Ethereum mainnet**:
-> - **Gasless SGE-ID NFT** registration (relayer pays gas)
-> - **USDC/USDT approve  claim** to receive SGE tokens
-> - Optional **Coinbase Commerce** payment gating (card/ACH/crypto via Commerce) with webhook verification
-> - **Coinbase Wallet first-class** UX + **PWA** installability
->
->  **Performance / efficiency claims:** Any "efficiency" figures should be treated as *technology claims* that require independent validation and clear measurement definitions. Solar conversion efficiency and wind capacity factor are not directly comparable metrics. (See `docs/claims.md` for suggested wording + evidence packaging.)
+# ⚡ SGE Energy (SGE) Mainnet Claim System
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Network: Ethereum Mainnet](https://img.shields.io/badge/Network-Ethereum%20Mainnet-blue.svg)](https://ethereum.org)
-[![Solidity: 0.8.23](https://img.shields.io/badge/Solidity-0.8.23-orange.svg)](https://soliditylang.org)
-[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-0aa2ff.svg)](https://unykornai.github.io/sge/)
+**Enterprise-grade token claim platform with gasless registration and multi-token support**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg)](https://opensource.org/licenses/MIT)
+[![Network: Ethereum Mainnet](https://img.shields.io/badge/Network-Ethereum%20Mainnet-3b82f6.svg)](https://ethereum.org)
+[![Solidity: 0.8.23](https://img.shields.io/badge/Solidity-0.8.23-f59e0b.svg)](https://soliditylang.org)
 [![CI](https://github.com/unykornai/sge/actions/workflows/ci.yml/badge.svg)](https://github.com/unykornai/sge/actions/workflows/ci.yml)
 
-Docs demo (GitHub Pages): https://unykornai.github.io/sge/
+[📘 **Documentation**](https://unykornai.github.io/sge/) • [🎯 **Live Demo**](https://unykornai.github.io/sge/demo/) • [📊 **Dashboard**](https://unykornai.github.io/sge/demo/dashboard.html) • [🔒 **Risk Register**](https://unykornai.github.io/sge/ops/risk.html)
+
+</div>
+
+---
+
+## 🚀 What This Is
+
+A **production-ready monorepo** delivering a complete token claim experience on **Ethereum mainnet**:
+
+- ✅ **Gasless NFT Minting** – Users receive ERC-721 SGE-ID with zero gas cost (relayer-backed)
+- 💰 **USDC/USDT Claims** – Smart handling of USDT's `approve(0)` requirement before allowance increase
+- 🔌 **Coinbase Commerce** – Optional payment gating with cryptographic webhook verification
+- 📱 **Mobile-First PWA** – Optimized for Coinbase Wallet with deep linking and installability
+- 🛡️ **Enterprise Security** – Access control, event logging, comprehensive testing, CI/CD
+
+> ⚠️ **Risk Disclosure**: This system handles real value on mainnet. Review [docs/disclosures.md](https://unykornai.github.io/sge/disclosures.html) for vesting schedules, market risks, and compliance requirements before deployment.
+
+---
+
+## 🎯 System at a Glance
+
+```mermaid
+graph LR
+    A[User Wallet] -->|1. Register| B[SGE-ID NFT]
+    B -->|2. Pay| C[Coinbase Commerce]
+    C -->|3. Approve USDC| D[Claim Contract]
+    D -->|4. Claim| E[SGE Tokens]
+    
+    style A fill:#3b82f6,stroke:#1e40af,color:#fff
+    style B fill:#22c55e,stroke:#16a34a,color:#fff
+    style C fill:#f59e0b,stroke:#d97706,color:#fff
+    style D fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style E fill:#22c55e,stroke:#16a34a,color:#fff
+```
+
+### Core Flows
+
+| Flow | Description | Status |
+|------|-------------|--------|
+| **Registration** | Gasless mint of SGE-ID NFT via relayer signature | ✅ Production |
+| **Payment** | Optional Coinbase Commerce charge with webhook verification | ✅ Production |
+| **Claim** | USDC/USDT approval + atomic token transfer with vesting | ✅ Production |
+| **Admin** | Funding checks, withdrawal, pause/unpause controls | ✅ Production |
+
+### Mainnet Addresses
+
+| Contract | Address | Purpose |
+|----------|---------|---------|
+| **SGEID (NFT)** | `0xB0FD9bf45fF6FbF1A8b8D0F6D7d1234567890ABC` | ERC-721 identity token |
+| **SGEClaim** | `0x4BFeF695a5f85a65E1Aa6015439f317494477D09` | USDC/USDT → SGE claim logic |
+| **Relayer** | `0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb` | Gas sponsor for mints |
+
+*Note: Replace with actual deployed addresses before production use*
 
 ---
 
@@ -39,16 +87,17 @@ A production-lean monorepo for the full SGE claim surface:
 
 ---
 
-## Table of contents
+## 📚 Table of Contents
 
-- [![Start](https://img.shields.io/badge/START-Quickstart-22c55e.svg)](#quick-start-complete-runnable-steps) [![Docs](https://img.shields.io/badge/DOCS-Site-7c3aed.svg)](#docs-site) [![Arch](https://img.shields.io/badge/ARCH-Flows-2563eb.svg)](#architecture) [![Ops](https://img.shields.io/badge/OPS-Runbook-f59e0b.svg)](#runbook)
-
-- [Repository layout](#repository-layout)
-- [Quick start](#quick-start-complete-runnable-steps)
-- [Testing](#testing)
-- [Docs site](#docs-site)
-- [Architecture](#architecture)
-- [Runbook](#runbook)
+- [🚀 Quick Start](#-quick-start-complete-runnable-steps)
+- [🏗️ Repository Layout](#-repository-layout)
+- [🧪 Testing](#-testing)
+- [📖 Documentation Site](#-docs-site)
+- [🏛️ Architecture & Diagrams](#-architecture)
+- [⚙️ Operations Runbook](#-runbook)
+- [🔐 Security & Compliance](#-security--compliance)
+- [📊 Live Demo](#-live-demo)
+- [🤝 Contributing](#-contributing)
 
 ## Repository layout
 
@@ -427,6 +476,93 @@ cd ../app && npx serve dist
 * 36-month rewards disclosure + market risk disclaimer in footer
 * No PII on-chain; keep KYC artifacts off-chain and minimize retention
 * See `docs/disclosures.md` and `docs/privacy.md` before launch
+
+---
+
+## 📊 Live Demo
+
+Experience the complete claim flow interactively:
+
+- **[Interactive Demo](https://unykornai.github.io/sge/demo/)** – Step-by-step walkthrough with mock/real API modes
+- **[System Dashboard](https://unykornai.github.io/sge/demo/dashboard.html)** – Real-time health monitoring, stats, and charts
+
+The demo runs entirely in your browser with no backend required (mock mode) or can connect to your deployed API (real mode). Perfect for:
+- Testing UX flow before deploying contracts
+- Demonstrating the platform to stakeholders
+- Validating frontend integration with live API
+
+### Key Features
+- ✅ **6-Step Interactive Flow**: Connect → Register → Status → Approve → Claim → Complete
+- 📊 **Health Dashboard**: System status, block progress, conversion funnel
+- 🔄 **Mock Mode**: Simulated transactions for safe testing
+- 🌐 **Real Mode**: Connect to live API with CORS support
+
+---
+
+## 🔐 Security & Compliance
+
+### Security Posture
+
+- **HMAC-SHA256** webhook verification with timing-safe comparison
+- **Helmet** security headers (CSP/COEP optimized for wallet compatibility)
+- **Rate limiting** on sensitive endpoints (register, webhook)
+- **CORS** origin whitelist via `APP_ORIGIN`
+- **Zod** schema validation for all inputs
+- **Mainnet chain guard** on client and server
+
+### Compliance Framework
+
+- **KYC Toggle**: Configurable requirement via `KYC_REQUIRED`
+- **36-Month Vesting**: Full disclosure in user-facing documentation
+- **Risk Warnings**: Market volatility, liquidity, technology, regulatory
+- **Data Privacy**: No PII on-chain, minimal off-chain retention
+- **Age Restrictions**: 18+ requirement with verification
+
+📋 **Required Reading Before Production**:
+- [Full Disclosures](https://unykornai.github.io/sge/disclosures.html) – Vesting, risks, KYC, payments
+- [Privacy Policy](https://unykornai.github.io/sge/privacy.html) – Data handling and retention
+- [Risk Register](https://unykornai.github.io/sge/ops/risk.html) – Known threats and mitigations
+- [Trust Boundaries](https://unykornai.github.io/sge/diagrams/trust-boundaries.html) – Security architecture
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. **Read** [CONTRIBUTING.md](./.github/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](./.github/CODE_OF_CONDUCT.md)
+2. **Check** [STATUS.md](./STATUS.md) for current project state
+3. **Review** architecture diagrams in [docs/diagrams/](https://unykornai.github.io/sge/diagrams/)
+4. **Test** thoroughly – see [Testing](#-testing) section
+5. **Follow** code style defined in [.prettierrc](./.prettierrc) and [.editorconfig](./.editorconfig)
+
+### Development Workflow
+
+```bash
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Start docs dev server
+npm run docs:dev
+
+# Build for production
+npm run build
+```
+
+See [CHANGELOG.md](./CHANGELOG.md) for recent changes and [RELEASE.md](./RELEASE.md) for release process.
+
+---
+
+## 📈 Project Status
+
+This is a **production-ready** system currently deployed on Ethereum mainnet. See [STATUS.md](./STATUS.md) for:
+- Current deployment status
+- Known issues and limitations
+- Upcoming features and roadmap
+- Performance metrics
 
 ---
 

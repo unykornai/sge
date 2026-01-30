@@ -19,28 +19,51 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/quickstart' },
       { text: 'Architecture', link: '/architecture/overview' },
-      { text: 'Runbook', link: '/ops/runbook' },
+      { text: 'Diagrams', link: '/diagrams/architecture' },
+      { text: 'Demo', link: '/demo/' },
+      { text: 'Operations', link: '/ops/runbook' },
       { text: 'Status', link: '/status' },
     ],
 
     sidebar: {
       '/guide/': [
         {
-          text: 'Guide',
+          text: 'Getting Started',
           items: [
             { text: 'Quickstart', link: '/guide/quickstart' },
-            { text: 'Environment', link: '/guide/environment' },
+            { text: 'Environment Setup', link: '/guide/environment' },
             { text: 'Testing', link: '/guide/testing' },
           ],
         },
       ],
       '/architecture/': [
         {
-          text: 'Architecture',
+          text: 'System Architecture',
           items: [
             { text: 'Overview', link: '/architecture/overview' },
             { text: 'Flow Trees', link: '/architecture/flows' },
             { text: 'Data & Storage', link: '/architecture/data' },
+          ],
+        },
+      ],
+      '/diagrams/': [
+        {
+          text: 'Diagrams',
+          items: [
+            { text: 'Architecture', link: '/diagrams/architecture' },
+            { text: 'Flows', link: '/diagrams/flows' },
+            { text: 'Sequences', link: '/diagrams/sequence' },
+            { text: 'Trust Boundaries', link: '/diagrams/trust-boundaries' },
+            { text: 'Data Model', link: '/diagrams/data-model' },
+          ],
+        },
+      ],
+      '/demo/': [
+        {
+          text: 'Interactive Demo',
+          items: [
+            { text: 'Claim Flow', link: '/demo/' },
+            { text: 'Dashboard', link: '/demo/dashboard' },
           ],
         },
       ],
@@ -49,8 +72,14 @@ export default defineConfig({
           text: 'Operations',
           items: [
             { text: 'Runbook', link: '/ops/runbook' },
-            { text: 'Claims (Evidence)', link: '/ops/claims' },
+            { text: 'Performance Claims', link: '/ops/claims' },
             { text: 'Threat Model', link: '/ops/threat-model' },
+          ],
+        },
+        {
+          text: 'Compliance',
+          items: [
+            { text: 'Disclosures', link: '/disclosures' },
           ],
         },
       ],
