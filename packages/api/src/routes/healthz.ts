@@ -8,6 +8,21 @@ const router = Router();
 
 router.get('/healthz', async (req: Request, res: Response) => {
   try {
+    if (env.MOCK_MODE) {
+      return res.json({
+        ok: true,
+        chainId: 1,
+        blockNumber: 19105234,
+        signerAddress: '0x0000000000000000000000000000000000000000',
+        sgeidAddress: env.SGEID_ADDRESS,
+        sgeidOwner: 'MOCK_MODE',
+        claimAddress: env.SGE_CLAIM,
+        hasClaimCode: true,
+        hasSgeidCode: true,
+        mode: 'mock',
+      });
+    }
+
     const network = await provider.getNetwork();
     const blockNumber = await provider.getBlockNumber();
     

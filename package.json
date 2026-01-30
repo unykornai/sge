@@ -5,7 +5,11 @@
   "description": "SGE Energy - Ethereum mainnet gasless minting and claim system",
   "workspaces": ["packages/*", "docs"],
   "scripts": {
-    "dev": "concurrently \"npm:dev -w @sge/api\" \"npm:dev -w @sge/app\"",
+    "dev": "concurrently -n API,APP -c cyan,green \"npm run dev -w @sge/api\" \"npm run dev -w @sge/app\"",
+    "dev:real": "concurrently -n API,WORKERS,APP -c cyan,magenta,green \"npm run dev -w @sge/api\" \"npm run worker:dev -w @sge/api\" \"npm run dev -w @sge/app\"",
+    "dev:api": "npm run dev -w @sge/api",
+    "dev:app": "npm run dev -w @sge/app",
+    "dev:workers": "npm run worker:dev -w @sge/api",
     "build": "npm run build -w @sge/shared && npm run build -w @sge/contracts && npm run build -w @sge/api && npm run build -w @sge/app",
     "build:shared": "npm run build -w @sge/shared",
     "build:contracts": "npm run build -w @sge/contracts",
@@ -22,7 +26,18 @@
     "test:ci": "npm test -w @sge/contracts && npm test -w @sge/api && npm test -w @sge/app",
     "docs:dev": "npm run dev -w @sge/docs",
     "docs:build": "npm run build -w @sge/docs",
-    "docs:preview": "npm run preview -w @sge/docs"
+    "docs:preview": "npm run preview -w @sge/docs",
+    "db:up": "docker-compose -f docker-compose.dev.yml up -d",
+    "db:down": "docker-compose -f docker-compose.dev.yml down",
+    "db:reset": "docker-compose -f docker-compose.dev.yml down -v && docker-compose -f docker-compose.dev.yml up -d",
+    "db:logs": "docker-compose -f docker-compose.dev.yml logs -f",
+    "prisma:generate": "npm run prisma:generate -w @sge/api",
+    "prisma:migrate": "npm run prisma:migrate -w @sge/api",
+    "prisma:push": "npm run prisma:push -w @sge/api",
+    "prisma:studio": "npm run prisma:studio -w @sge/api",
+    "setup": "npm install && npm run build:shared && npm run prisma:generate",
+    "setup:real": "npm install && npm run db:up && sleep 5 && npm run prisma:push && npm run prisma:generate && npm run build:shared",
+    "bootstrap": "node scripts/bootstrap.sh"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

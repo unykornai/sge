@@ -221,4 +221,93 @@ router.get('/admin/fund-check', adminAuth, async (req: Request, res: Response) =
   }
 });
 
+/**
+ * GET /api/admin/stats/timeseries
+ * Get time-series data for charts (registrations and claims)
+ */
+router.get('/admin/stats/timeseries', adminAuth, async (req: Request, res: Response) => {
+  try {
+    const { days = 7 } = req.query;
+    const daysNum = parseInt(String(days), 10);
+
+    // In MOCK_MODE, return deterministic mock data
+    if (env.MOCK_MODE) {
+      return res.json(getMockTimeSeriesStats(daysNum));
+    }
+
+    // Real mode: aggregate from JSON files
+    const mints = await readJson<Record<string, any>>('mints.json');
+    const claims = await readJson<Record<string, any>>('claims.json');
+
+    const cutoffDate = Date.now() - (daysNum * 24 * 60 * 60 * 1000);
+    
+    // Group by day
+    const dayMap = new Map<string, { registrations: number; claims: number }>();
+
+    Object.entries(mints).forEach(([_, record]) => {
+      if (record.timestamp && record.timestamp >= cutoffDate) {
+        const day = new Date(record.timestamp).toISOString().split('T')[0];
+        const existing = dayMap.get(day) || { registrations: 0, claims: 0 };
+        existing.registrations++;
+        dayMap.set(day, existing);
+      }
+    });
+
+    Object.entries(claims).forEach(([_, record]) => {
+      if (record.timestamp && record.timestamp >= cutoffDate) {
+        const day = new Date(record.timestamp).toISOString().split('T')[0];
+        const existing = dayMap.get(day) || { registrations: 0, claims: 0 };
+        existing.claims++;
+        dayMap.set(day, existing);
+      }
+    });
+
+    // Convert to array and sort
+    const timeseries = Array.from(dayMap.entries())
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json({
+      summary: {
+        totalMints: Object.keys(mints).length,
+        totalClaims: Object.keys(claims).length,
+      },
+      timeseries,
+    });
+  } catch (error: any) {
+    logger.error({ error: error.message }, 'Admin stats timeseries error');
+    res.status(500).json({ error: 'Failed to fetch timeseries stats' });
+  }
+});
+
+/**
+ * Mock time-series data generator
+ */
+function getMockTimeSeriesStats(days: number) {
+  const timeseries = [];
+  const today = new Date();
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+
+    // Generate realistic mock data with growth trend
+    const dayIndex = days - i;
+    timeseries.push({
+      date: dateStr,
+      registrations: Math.floor(Math.random() * 30) + dayIndex * 2 + 10,
+      claims: Math.floor(Math.random() * 20) + dayIndex + 5,
+    });
+  }
+
+  return {
+    summary: {
+      totalMints: 1247,
+      totalClaims: 892,
+    },
+    timeseries,
+  };
+}
+
 export default router;

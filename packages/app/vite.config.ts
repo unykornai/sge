@@ -1,8 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import path from 'path';
 
 export default defineConfig({
+  // For GitHub Pages, the demo app is served from a subpath (e.g. /sge/demo/).
+  // Vite needs an explicit base so asset URLs resolve correctly.
+  base: process.env.VITE_BASE || '/',
+  resolve: {
+    alias: {
+      '@sge/shared': path.resolve(__dirname, '../shared/src/index.ts'),
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -15,20 +24,21 @@ export default defineConfig({
         theme_color: '#12B886',
         background_color: '#081B0E',
         display: 'standalone',
-        start_url: '/',
+        // Use a relative start URL so it works under GitHub Pages subpaths.
+        start_url: '.',
         icons: [
           {
-            src: '/icon-192.png',
+            src: 'icon-192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/icon-512.png',
+            src: 'icon-512.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: '/icon-512.png',
+            src: 'icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -57,7 +67,7 @@ export default defineConfig({
             handler: 'NetworkOnly',
           },
         ],
-        navigateFallback: '/index.html',
+        navigateFallback: `${process.env.VITE_BASE || '/'}index.html`,
         navigateFallbackDenylist: [/^\/api/],
       },
     }),

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useChainId, useReadContract, useWriteContract, useWaitForTransactionReceipt, useSimulateContract } from 'wagmi';
 import { type Address } from 'viem';
-import { erc20Abi, claimAbi, FEE_6_DECIMALS } from '@sge/shared';
+import * as shared from '@sge/shared';
 import { env } from '../config';
 import AtomicFallback from '../components/AtomicFallback';
+
+const { erc20Abi, claimAbi, FEE_6_DECIMALS } = shared;
 
 type TokenType = 'USDC' | 'USDT';
 type ApprovalState = 'idle' | 'resetting' | 'approving' | 'approved' | 'error';

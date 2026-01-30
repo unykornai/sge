@@ -32,6 +32,7 @@ export default defineConfig({
           items: [
             { text: 'Quickstart', link: '/guide/quickstart' },
             { text: 'Environment Setup', link: '/guide/environment' },
+            { text: 'Upgrade Path', link: '/guide/upgrade-path' },
             { text: 'Testing', link: '/guide/testing' },
           ],
         },
@@ -40,9 +41,19 @@ export default defineConfig({
         {
           text: 'System Architecture',
           items: [
+            { text: 'Index', link: '/architecture/index' },
             { text: 'Overview', link: '/architecture/overview' },
+            { text: 'System Design', link: '/architecture/system' },
+            { text: 'Workflows', link: '/architecture/workflows' },
             { text: 'Flow Trees', link: '/architecture/flows' },
             { text: 'Data & Storage', link: '/architecture/data' },
+            { text: 'Enterprise Platform', link: '/architecture/enterprise' },
+          ],
+        },
+        {
+          text: 'Brand Guidelines',
+          items: [
+            { text: 'Theme & Style', link: '/brand/theme' },
           ],
         },
       ],
@@ -72,6 +83,7 @@ export default defineConfig({
           text: 'Operations',
           items: [
             { text: 'Runbook', link: '/ops/runbook' },
+            { text: 'Reconciliation', link: '/ops/reconciliation' },
             { text: 'Performance Claims', link: '/ops/claims' },
             { text: 'Threat Model', link: '/ops/threat-model' },
           ],

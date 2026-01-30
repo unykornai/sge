@@ -24,6 +24,10 @@ function getContract() {
  * Verify relayer owns the SGEID contract
  */
 export async function verifyOwnership(): Promise<void> {
+  if (env.MOCK_MODE) {
+    logger.info('MOCK_MODE enabled: skipping SGEID ownership verification');
+    return;
+  }
   if (/^0x0{40}$/i.test(env.SGEID_ADDRESS)) {
     throw new Error(
       'SGEID_ADDRESS is the zero address. Configure a deployed SGEID contract address in .env'
@@ -68,6 +72,24 @@ export async function mintTo(wallet: string): Promise<MintRecord & { etherscanUr
     return {
       ...existing,
       etherscanUrl: etherscanTx(existing.txHash),
+    };
+  }
+
+  if (env.MOCK_MODE) {
+    const mockHash = ethers.keccak256(ethers.toUtf8Bytes(`mock-${checksummedWallet}`));
+    const mockTokenId = parseInt(mockHash.slice(2, 10), 16) % 100000;
+    const record: MintRecord = {
+      tokenId: mockTokenId,
+      txHash: mockHash,
+      timestamp: Date.now(),
+    };
+
+    await upsertByKey(MINTS_FILE, checksummedWallet, record);
+    logger.info({ wallet: checksummedWallet, tokenId: record.tokenId }, 'Mock mint created');
+
+    return {
+      ...record,
+      etherscanUrl: etherscanTx(record.txHash),
     };
   }
   

@@ -37,6 +37,21 @@ jobs:
         env:
           VITEPRESS_BASE: /sge/
 
+      - name: Build demo app
+        run: |
+          cd packages/app
+          npm run build
+        env:
+          VITE_DEMO_MODE: true
+          VITE_API_URL: https://unykornai.github.io/sge
+          VITE_BASE: /sge/demo/
+          NODE_ENV: production
+
+      - name: Merge builds
+        run: |
+          mkdir -p docs/.vitepress/dist/demo
+          cp -r packages/app/dist/* docs/.vitepress/dist/demo/
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

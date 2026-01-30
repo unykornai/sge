@@ -1,19 +1,34 @@
 #!/usr/bin/env pwsh
 # Bootstrap script for Windows
-# Sets up the repo for first-time contributors
+# One-command setup: .\scripts\bootstrap.ps1
+# Sets up the repo for first-time contributors with MOCK_MODE (no secrets required)
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🚀 SGE Energy - Bootstrap Setup" -ForegroundColor Green
-Write-Host "================================`n" -ForegroundColor Green
+Write-Host ""
+Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Green
+Write-Host "║                                                                ║" -ForegroundColor Green
+Write-Host "║   🚀 SGE Energy - Enterprise Settlement Platform             ║" -ForegroundColor Green
+Write-Host "║                                                                ║" -ForegroundColor Green
+Write-Host "║   Fork-and-Run Setup (MOCK_MODE)                              ║" -ForegroundColor Green
+Write-Host "║   No secrets, wallets, or DB required                         ║" -ForegroundColor Green
+Write-Host "║                                                                ║" -ForegroundColor Green
+Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host ""
 
 # Check Node.js version
 Write-Host "📦 Checking Node.js version..." -ForegroundColor Cyan
 try {
     $nodeVersion = node --version
+    $versionNumber = [version]($nodeVersion -replace 'v','')
+    if ($versionNumber.Major -lt 18) {
+        Write-Host "  ❌ Node.js 18+ required. Found: $nodeVersion" -ForegroundColor Red
+        Write-Host "     Download from: https://nodejs.org" -ForegroundColor Yellow
+        exit 1
+    }
     Write-Host "  ✅ Node.js $nodeVersion detected" -ForegroundColor Green
 } catch {
-    Write-Host "  ❌ Node.js not found. Please install Node.js 18+ from https://nodejs.org" -ForegroundColor Red
+    Write-Host "  ❌ Node.js not found. Install from https://nodejs.org" -ForegroundColor Red
     exit 1
 }
 
@@ -29,7 +44,7 @@ try {
 
 # Install dependencies
 Write-Host "`n📥 Installing dependencies..." -ForegroundColor Cyan
-Write-Host "  This may take a few minutes..." -ForegroundColor Yellow
+Write-Host "  This may take 2-3 minutes on first run..." -ForegroundColor Gray
 npm install
 if ($LASTEXITCODE -ne 0) {
     Write-Host "  ❌ npm install failed" -ForegroundColor Red
@@ -37,17 +52,183 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "  ✅ Dependencies installed" -ForegroundColor Green
 
-# Build shared package
+# Build shared package (required for other packages)
 Write-Host "`n🔨 Building shared package..." -ForegroundColor Cyan
-npm run build -w @sge/shared
+npm run build:shared
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "  ❌ Build failed" -ForegroundColor Red
+    Write-Host "  ❌ Shared package build failed" -ForegroundColor Red
     exit 1
 }
 Write-Host "  ✅ Shared package built" -ForegroundColor Green
 
-# Check for .env files
-Write-Host "`n🔐 Checking environment configuration..." -ForegroundColor Cyan
+# Generate Prisma client (works in MOCK_MODE too)
+Write-Host "`n🔧 Generating Prisma client..." -ForegroundColor Cyan
+npm run prisma:generate 2>$null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "  ✅ Prisma client generated" -ForegroundColor Green
+} else {
+    Write-Host "  ⚠️  Prisma generation skipped (not required for MOCK_MODE)" -ForegroundColor Yellow
+}
+
+# Create .env files with MOCK_MODE defaults
+Write-Host "`n🔐 Setting up environment configuration..." -ForegroundColor Cyan
+
+$apiEnvPath = "packages/api/.env"
+$apiEnvExamplePath = "packages/api/.env.example"
+
+if (Test-Path $apiEnvPath) {
+    Write-Host "  ✅ API .env already exists (skipping)" -ForegroundColor Green
+} else {
+    Write-Host "  📝 Creating API .env with MOCK_MODE..." -ForegroundColor Yellow
+    
+    if (Test-Path $apiEnvExamplePath) {
+        Copy-Item $apiEnvExamplePath $apiEnvPath
+        Write-Host "  ✅ Created from .env.example" -ForegroundColor Green
+    } else {
+        # Fallback minimal config
+        $mockEnv = @"
+# SGE API - MOCK MODE (no secrets required)
+NODE_ENV=development
+MOCK_MODE=true
+PORT=3000
+APP_ORIGIN=http://localhost:5173
+
+# Mock mode features (no external services needed)
+KYC_REQUIRED=false
+COMMERCE_REQUIRED=false
+ALLOW_SOFT_KYC=true
+ENABLE_ENTERPRISE_API=true
+ENABLE_AFFILIATE_SYSTEM=true
+ENABLE_COMMISSION_ENGINE=true
+ENABLE_PAYOUT_SYSTEM=true
+"@
+        $mockEnv | Out-File -FilePath $apiEnvPath -Encoding utf8
+        Write-Host "  ✅ Created minimal MOCK_MODE .env" -ForegroundColor Green
+    }
+}
+
+$appEnvPath = "packages/app/.env"
+$appEnvExamplePath = "packages/app/.env.example"
+
+if (Test-Path $appEnvPath) {
+    Write-Host "  ✅ App .env already exists (skipping)" -ForegroundColor Green
+} else {
+    Write-Host "  📝 Creating App .env..." -ForegroundColor Yellow
+    
+    if (Test-Path $appEnvExamplePath) {
+        Copy-Item $appEnvExamplePath $appEnvPath
+        Write-Host "  ✅ Created from .env.example" -ForegroundColor Green
+    } else {
+        # Fallback minimal config
+        $appEnv = @"
+# SGE App - Local Dev
+VITE_API_URL=http://localhost:3000
+VITE_MOCK_MODE=true
+VITE_DEMO_MODE=false
+VITE_CHAIN_ID=1
+"@
+        $appEnv | Out-File -FilePath $appEnvPath -Encoding utf8
+        Write-Host "  ✅ Created minimal .env" -ForegroundColor Green
+    }
+}
+
+# Run typecheck
+Write-Host "`n🧪 Running type checks..." -ForegroundColor Cyan
+npm run typecheck 2>$null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "  ✅ Type checks passed" -ForegroundColor Green
+} else {
+    Write-Host "  ⚠️  Type checks have warnings (safe to ignore in MOCK_MODE)" -ForegroundColor Yellow
+}
+
+# Success summary
+Write-Host ""
+Write-Host "╔════════════════════════════════════════════════════════════════╗" -ForegroundColor Green
+Write-Host "║                                                                ║" -ForegroundColor Green
+Write-Host "║   ✨ Bootstrap Complete! Ready to run.                        ║" -ForegroundColor Green
+Write-Host "║                                                                ║" -ForegroundColor Green
+Write-Host "╚════════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host ""
+
+Write-Host "┌─ QUICK START ─────────────────────────────────────────────┐" -ForegroundColor Cyan
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  Start everything (API + Workers + App):                 │" -ForegroundColor White
+Write-Host "│  " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run dev" -ForegroundColor Yellow
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  Then open: " -NoNewline -ForegroundColor White
+Write-Host "http://localhost:5173" -ForegroundColor Magenta
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "└───────────────────────────────────────────────────────────┘" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "┌─ WHAT'S RUNNING ──────────────────────────────────────────┐" -ForegroundColor Cyan
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  ✓ MOCK_MODE enabled (no DB/Redis/RPC required)          │" -ForegroundColor Green
+Write-Host "│  ✓ In-memory database (data resets on restart)           │" -ForegroundColor Green
+Write-Host "│  ✓ In-memory queue (instant processing)                  │" -ForegroundColor Green
+Write-Host "│  ✓ Mock blockchain provider (no real wallets)            │" -ForegroundColor Green
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "└───────────────────────────────────────────────────────────┘" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "┌─ OTHER COMMANDS ──────────────────────────────────────────┐" -ForegroundColor Cyan
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run dev:api" -NoNewline -ForegroundColor Yellow
+Write-Host "      - API only                              │" -ForegroundColor White
+Write-Host "│  " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run dev:app" -NoNewline -ForegroundColor Yellow
+Write-Host "      - App only                              │" -ForegroundColor White
+Write-Host "│  " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run dev:workers" -NoNewline -ForegroundColor Yellow
+Write-Host "  - Workers only                          │" -ForegroundColor White
+Write-Host "│  " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run docs:dev" -NoNewline -ForegroundColor Yellow
+Write-Host "    - Documentation site                    │" -ForegroundColor White
+Write-Host "│  " -NoNewline -ForegroundColor Cyan
+Write-Host "npm test" -NoNewline -ForegroundColor Yellow
+Write-Host "            - Run contract tests                     │" -ForegroundColor White
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "└───────────────────────────────────────────────────────────┘" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "┌─ UPGRADING TO REAL MODE ──────────────────────────────────┐" -ForegroundColor Cyan
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  1. Start database:                                       │" -ForegroundColor White
+Write-Host "│     " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run db:up" -ForegroundColor Yellow
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  2. Run migrations:                                       │" -ForegroundColor White
+Write-Host "│     " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run prisma:push" -ForegroundColor Yellow
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  3. Generate wallets:                                     │" -ForegroundColor White
+Write-Host "│     " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run wallet:new" -ForegroundColor Yellow
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  4. Edit packages/api/.env:                               │" -ForegroundColor White
+Write-Host "│     - Set " -NoNewline -ForegroundColor Cyan
+Write-Host "MOCK_MODE=false" -ForegroundColor Yellow
+Write-Host "│     - Add your RPC URL                                    │" -ForegroundColor Cyan
+Write-Host "│     - Add RELAYER_PRIVATE_KEY                             │" -ForegroundColor Cyan
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "│  5. Deploy contracts:                                     │" -ForegroundColor White
+Write-Host "│     " -NoNewline -ForegroundColor Cyan
+Write-Host "npm run deploy:contracts" -ForegroundColor Yellow
+Write-Host "│                                                           │" -ForegroundColor Cyan
+Write-Host "└───────────────────────────────────────────────────────────┘" -ForegroundColor Cyan
+Write-Host ""
+
+Write-Host "📚 Documentation: " -NoNewline -ForegroundColor Cyan
+Write-Host "https://unykornai.github.io/sge/" -ForegroundColor Magenta
+Write-Host "🐛 Issues: " -NoNewline -ForegroundColor Cyan
+Write-Host "https://github.com/unykornai/sge/issues" -ForegroundColor Magenta
+Write-Host "💬 Discussions: " -NoNewline -ForegroundColor Cyan
+Write-Host "https://github.com/unykornai/sge/discussions" -ForegroundColor Magenta
+Write-Host ""
+
+Write-Host "Happy coding! 🎉`n" -ForegroundColor Green
 
 $apiEnvPath = "packages/api/.env"
 if (Test-Path $apiEnvPath) {

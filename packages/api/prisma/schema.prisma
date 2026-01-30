@@ -1,0 +1,527 @@
+// Prisma Schema for SGE Settlement Platform
+// Multi-tenant affiliate + settlement + payout system
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum ProgramStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum AffiliateStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+}
+
+enum IntentType {
+  REGISTER
+  CLAIM
+  COMMERCE_PAYMENT
+  PAYOUT
+}
+
+enum IntentStatus {
+  PENDING
+  PROCESSING
+  CONFIRMED
+  FAILED
+  EXPIRED
+}
+
+enum SettlementStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REVERSED
+}
+
+enum CommissionStatus {
+  ACCRUED
+  PAYABLE
+  PAID
+  CANCELLED
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum PayoutMethod {
+  ONCHAIN_USDC
+  ONCHAIN_USDT
+  ACH
+  WIRE
+  MANUAL
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  PROGRAM_OWNER
+  AFFILIATE
+  USER
+}
+
+// ============================================
+// PROGRAMS (Multi-tenant)
+// ============================================
+
+model Program {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  status           ProgramStatus @default(ACTIVE)
+  
+  // Treasury & contracts
+  treasuryAddress  String
+  sgeTokenAddress  String?
+  sgeClaimAddress  String?
+  sgeidAddress     String?
+  
+  // Fee configuration
+  feeUsd           Decimal       @default(100) @db.Decimal(18, 6)
+  claimAmount      Decimal       @default(1000) @db.Decimal(18, 6)
+  
+  // Commission rules
+  directCommissionPct   Decimal  @default(10) @db.Decimal(5, 2)  // 10%
+  overrideCommissionPct Decimal  @default(5)  @db.Decimal(5, 2)  // 5% to parent
+  maxAffiliateDepth     Int      @default(2)
+  
+  // Feature gates
+  kycRequired      Boolean       @default(false)
+  commerceRequired Boolean       @default(false)
+  mockMode         Boolean       @default(false)
+  
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  
+  // Relations
+  affiliates       Affiliate[]
+  users            User[]
+  intents          Intent[]
+  settlements      Settlement[]
+  ledgerEntries    LedgerEntry[]
+  commissions      Commission[]
+  payouts          Payout[]
+  payoutBatches    PayoutBatch[]
+  auditLogs        AuditLog[]
+
+  @@index([status])
+  @@index([slug])
+}
+
+// ============================================
+// AFFILIATES (Hierarchical)
+// ============================================
+
+model Affiliate {
+  id               String          @id @default(cuid())
+  programId        String
+  program          Program         @relation(fields: [programId], references: [id])
+  
+  // Hierarchy
+  parentId         String?
+  parent           Affiliate?      @relation("AffiliateTree", fields: [parentId], references: [id])
+  children         Affiliate[]     @relation("AffiliateTree")
+  depth            Int             @default(1)
+  
+  // Identity
+  wallet           String
+  referralCode     String
+  email            String?
+  displayName      String?
+  
+  status           AffiliateStatus @default(PENDING)
+  
+  // Stats (denormalized for perf)
+  totalReferrals   Int             @default(0)
+  totalEarnings    Decimal         @default(0) @db.Decimal(18, 6)
+  pendingEarnings  Decimal         @default(0) @db.Decimal(18, 6)
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  
+  // Relations
+  termsAcceptances AffiliateTermsAcceptance[]
+  referredUsers    User[]
+  directCommissions  Commission[]  @relation("DirectAffiliate")
+  overrideCommissions Commission[] @relation("OverrideAffiliate")
+  payouts          Payout[]
+
+  @@unique([programId, wallet])
+  @@unique([programId, referralCode])
+  @@index([programId, status])
+  @@index([parentId])
+}
+
+model AffiliateTermsAcceptance {
+  id             String    @id @default(cuid())
+  affiliateId    String
+  affiliate      Affiliate @relation(fields: [affiliateId], references: [id])
+  
+  termsVersion   String
+  termsHash      String
+  walletSignature String
+  ipAddress      String?
+  userAgent      String?
+  
+  acceptedAt     DateTime  @default(now())
+
+  @@index([affiliateId])
+}
+
+// ============================================
+// USERS (End clients)
+// ============================================
+
+model User {
+  id               String    @id @default(cuid())
+  programId        String
+  program          Program   @relation(fields: [programId], references: [id])
+  
+  wallet           String
+  
+  // Attribution (locked on first qualifying event)
+  referredById     String?
+  referredBy       Affiliate? @relation(fields: [referredById], references: [id])
+  referredAt       DateTime?
+  attributionProof Json?     // { refCode, ip, userAgent, timestamp }
+  
+  // SGE-ID status
+  sgeidTokenId     BigInt?
+  sgeidMintedAt    DateTime?
+  
+  // Claim status
+  hasClaimed       Boolean   @default(false)
+  claimedAt        DateTime?
+  claimTxHash      String?
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([programId, wallet])
+  @@index([programId])
+  @@index([referredById])
+}
+
+// ============================================
+// INTENTS (Idempotent action queue)
+// ============================================
+
+model Intent {
+  id               String       @id @default(cuid())
+  programId        String
+  program          Program      @relation(fields: [programId], references: [id])
+  
+  type             IntentType
+  idempotencyKey   String       @unique
+  
+  wallet           String
+  payload          Json         // Type-specific data
+  
+  status           IntentStatus @default(PENDING)
+  
+  // Processing tracking
+  attempts         Int          @default(0)
+  lastAttemptAt    DateTime?
+  nextRetryAt      DateTime?
+  
+  // Result
+  resultTxHash     String?
+  resultData       Json?
+  errorMessage     String?
+  
+  // Worker tracking
+  lockedBy         String?
+  lockedUntil      DateTime?
+  
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  completedAt      DateTime?
+
+  // Relations
+  settlement       Settlement?
+
+  @@index([programId, type, status])
+  @@index([status, nextRetryAt])
+  @@index([wallet])
+}
+
+// ============================================
+// SETTLEMENTS (On-chain confirmations)
+// ============================================
+
+model Settlement {
+  id               String           @id @default(cuid())
+  programId        String
+  program          Program          @relation(fields: [programId], references: [id])
+  
+  intentId         String           @unique
+  intent           Intent           @relation(fields: [intentId], references: [id])
+  
+  wallet           String
+  type             String           // MINT, CLAIM, PAYMENT
+  token            String?          // USDC, USDT, ETH
+  amount           Decimal          @db.Decimal(18, 6)
+  
+  txHash           String           @unique
+  blockNumber      BigInt
+  blockTimestamp   DateTime
+  
+  status           SettlementStatus @default(PENDING)
+  
+  // Verification
+  verified         Boolean          @default(false)
+  verifiedAt       DateTime?
+  
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relations
+  commissions      Commission[]
+  ledgerEntries    LedgerEntry[]
+
+  @@index([programId, type])
+  @@index([wallet])
+  @@index([status])
+}
+
+// ============================================
+// LEDGER (Double-entry accounting)
+// ============================================
+
+model LedgerEntry {
+  id               String      @id @default(cuid())
+  programId        String
+  program          Program     @relation(fields: [programId], references: [id])
+  
+  // Accounts (e.g., "revenue", "affiliate:abc123:liability", "payout:xyz")
+  account          String
+  counterparty     String
+  
+  // Amount (positive = debit to account, negative = credit)
+  amount           Decimal     @db.Decimal(18, 6)
+  currency         String      @default("USD")
+  
+  // Reference
+  refType          String      // SETTLEMENT, COMMISSION, PAYOUT, ADJUSTMENT
+  refId            String
+  
+  // Optional link to settlement
+  settlementId     String?
+  settlement       Settlement? @relation(fields: [settlementId], references: [id])
+  
+  description      String?
+  
+  createdAt        DateTime    @default(now())
+
+  @@index([programId, account])
+  @@index([refType, refId])
+}
+
+// ============================================
+// COMMISSIONS
+// ============================================
+
+model Commission {
+  id               String           @id @default(cuid())
+  programId        String
+  program          Program          @relation(fields: [programId], references: [id])
+  
+  // Source
+  settlementId     String
+  settlement       Settlement       @relation(fields: [settlementId], references: [id])
+  
+  // Affiliate (direct or override)
+  affiliateId      String
+  affiliate        Affiliate        @relation("DirectAffiliate", fields: [affiliateId], references: [id])
+  
+  // Override affiliate (parent who gets override commission)
+  overrideAffiliateId String?
+  overrideAffiliate   Affiliate?    @relation("OverrideAffiliate", fields: [overrideAffiliateId], references: [id])
+  
+  // Commission details
+  commissionType   String           // DIRECT, OVERRIDE
+  rate             Decimal          @db.Decimal(5, 2)
+  baseAmount       Decimal          @db.Decimal(18, 6)
+  amount           Decimal          @db.Decimal(18, 6)
+  currency         String           @default("USD")
+  
+  status           CommissionStatus @default(ACCRUED)
+  
+  // Payout reference
+  payoutId         String?
+  payout           Payout?          @relation(fields: [payoutId], references: [id])
+  
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  paidAt           DateTime?
+
+  @@index([programId, affiliateId, status])
+  @@index([settlementId])
+  @@index([payoutId])
+}
+
+// ============================================
+// PAYOUTS
+// ============================================
+
+model PayoutBatch {
+  id               String       @id @default(cuid())
+  programId        String
+  program          Program      @relation(fields: [programId], references: [id])
+  
+  period           String       // e.g., "2026-01-W4" or "2026-01"
+  totalAmount      Decimal      @db.Decimal(18, 6)
+  affiliateCount   Int
+  
+  status           PayoutStatus @default(PENDING)
+  
+  // Approval workflow
+  createdById      String?
+  approvedById     String?
+  approvedAt       DateTime?
+  
+  // Execution
+  executedAt       DateTime?
+  executionTxHash  String?
+  
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  // Relations
+  payouts          Payout[]
+
+  @@unique([programId, period])
+  @@index([programId, status])
+}
+
+model Payout {
+  id               String       @id @default(cuid())
+  programId        String
+  program          Program      @relation(fields: [programId], references: [id])
+  
+  affiliateId      String
+  affiliate        Affiliate    @relation(fields: [affiliateId], references: [id])
+  
+  batchId          String?
+  batch            PayoutBatch? @relation(fields: [batchId], references: [id])
+  
+  idempotencyKey   String       @unique
+  
+  amount           Decimal      @db.Decimal(18, 6)
+  currency         String       @default("USD")
+  
+  method           PayoutMethod
+  destination      String       // Wallet address or bank account ref
+  
+  status           PayoutStatus @default(PENDING)
+  
+  // Execution details
+  txHash           String?      @unique
+  executedAt       DateTime?
+  errorMessage     String?
+  
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  // Relations
+  commissions      Commission[]
+
+  @@index([programId, affiliateId])
+  @@index([batchId])
+  @@index([status])
+}
+
+// ============================================
+// AUDIT LOG (Immutable)
+// ============================================
+
+model AuditLog {
+  id               String   @id @default(cuid())
+  programId        String?
+  program          Program? @relation(fields: [programId], references: [id])
+  
+  action           String   // e.g., "AFFILIATE_CREATED", "PAYOUT_APPROVED"
+  actorId          String?  // User/admin who performed action
+  actorType        String?  // ADMIN, SYSTEM, AFFILIATE, USER
+  
+  targetType       String?  // Entity type affected
+  targetId         String?  // Entity ID affected
+  
+  before           Json?    // State before action
+  after            Json?    // State after action
+  metadata         Json?    // Additional context
+  
+  ipAddress        String?
+  userAgent        String?
+  
+  createdAt        DateTime @default(now())
+
+  @@index([programId, action])
+  @@index([targetType, targetId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+// ============================================
+// SESSIONS / AUTH (Optional)
+// ============================================
+
+model Session {
+  id               String   @id @default(cuid())
+  
+  wallet           String
+  role             UserRole
+  programId        String?
+  affiliateId      String?
+  
+  nonce            String
+  signature        String?
+  
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+
+  @@index([wallet])
+}
+
+// ============================================
+// IDEMPOTENCY (Phase 2: Production Hardening)
+// ============================================
+
+model IdempotencyRecord {
+  id           String   @id @default(cuid())
+  key          String
+  requestHash  String
+  method       String
+  path         String
+  wallet       String?
+  statusCode   Int
+  responseBody Json
+  responseHdrs Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([key, requestHash])
+  @@index([createdAt])
+}
+

@@ -2,28 +2,88 @@
 
 # ⚡ SGE Energy (SGE) Mainnet Claim System
 
-**Enterprise-grade token claim platform with gasless registration and multi-token support**
+**Enterprise-grade settlement platform with multi-tenant affiliate network and perfect accounting**
 
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-22c55e.svg)](https://github.com/unykornai/sge#license)
 [![Network: Ethereum Mainnet](https://img.shields.io/badge/Network-Ethereum%20Mainnet-3b82f6.svg)](https://ethereum.org)
 [![Solidity: 0.8.23](https://img.shields.io/badge/Solidity-0.8.23-f59e0b.svg)](https://soliditylang.org)
-[![CI](https://github.com/unykornai/sge/actions/workflows/ci.yml/badge.svg)](https://github.com/unykornai/sge/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 
-[📘 **Documentation**](https://unykornai.github.io/sge/) • [🎯 **Live Demo**](https://unykornai.github.io/sge/demo/) • [📊 **Dashboard**](https://unykornai.github.io/sge/demo/dashboard.html) • [🔒 **Risk Register**](https://unykornai.github.io/sge/ops/risk.html)
+[📘 **Documentation**](https://unykornai.github.io/sge/) • [🎯 **Live Demo**](https://unykornai.github.io/sge/demo/) • [📊 **Status Dashboard**](https://unykornai.github.io/sge/demo/#/status) • [🔒 **Security**](https://unykornai.github.io/sge/SECURITY.html)
 
 </div>
 
 ---
 
-## 🚀 What This Is
+## 🚀 Quick Start (30 Seconds)
 
-A **production-ready monorepo** delivering a complete token claim experience on **Ethereum mainnet**:
+**Fork-and-run in mock mode** (no database, no secrets, no blockchain):
+
+```bash
+git clone https://github.com/YOUR_USERNAME/sge-eth-one-swoop.git
+cd sge-eth-one-swoop
+npm run setup    # or: ./scripts/bootstrap.sh on Unix
+npm run dev      # Starts API + App + Workers
+```
+
+Open http://localhost:5173 and register a wallet. **Everything works in-memory.**
+
+### Phase 2: Production Hardening ✨ NEW
+
+**Idempotency + Rate Limits + Metrics + Load Testing**
+
+```powershell
+# Install Phase 2 dependencies
+.\scripts\install-phase2.ps1
+
+# Test idempotency (prevents duplicate settlements)
+$key="test-123"
+curl -H "Idempotency-Key: $key" -H "Content-Type: application/json" -d '{"wallet":"0x1111111111111111111111111111111111111111"}' http://localhost:3000/api/register
+
+# Check Prometheus metrics
+curl http://localhost:3000/metrics
+
+# Load test with k6 (10k concurrent users)
+cd ops\k6
+k6 run register.js
+```
+
+**Features:**
+- ✅ Idempotency keys (no duplicate settlements, even with retries)
+- ✅ Tiered rate limiting (5/hour register, 60/hour claims)
+- ✅ Prometheus metrics at `/metrics` endpoint
+- ✅ OpenTelemetry tracing (opt-in via `OTEL_ENABLED=true`)
+- ✅ k6 load tests for production validation
+
+See [PHASE2_COMPLETE.md](PHASE2_COMPLETE.md) for details.
+
+### 4 Operating Modes
+
+| Mode | Database | Queue | Blockchain | Use Case |
+|------|----------|-------|------------|----------|
+| **📄 Pages Demo** | ❌ MSW | ❌ MSW | ❌ MSW | GitHub Pages hosted demo |
+| **🧪 Local Mock** | ✅ In-memory | ✅ In-memory | ❌ Mock provider | Default - no setup required |
+| **🔧 Local Real** | ✅ Postgres | ✅ Redis | ✅ Mainnet RPC | Full stack testing |
+| **🚀 Production** | ✅ Postgres | ✅ Redis | ✅ Mainnet RPC | Live deployment |
+
+**Default is Mock Mode** - perfect for development and demos. See [docs/start.md](https://unykornai.github.io/sge/start.html) for upgrade path.
+
+---
+
+## 🎯 What This Is
+
+A **multi-tenant settlement platform** with:
 
 - ✅ **Gasless NFT Minting** – Users receive ERC-721 SGE-ID with zero gas cost (relayer-backed)
 - 💰 **USDC/USDT Claims** – Smart handling of USDT's `approve(0)` requirement before allowance increase
+- 🏢 **Multi-Tenant Programs** – Isolate client settlements with dedicated treasury addresses
+- 🌳 **Affiliate Hierarchy** – Tree-based attribution with tiered commission splits
+- 📒 **Double-Entry Ledger** – Perfect settlement guarantees with debit/credit verification
+- 💸 **Payout Engine** – Automated commission calculation with 2-person approval workflow
+- 📊 **Operational Monitoring** – Real-time dashboards with health checks and reconciliation
 - 🔌 **Coinbase Commerce** – Optional payment gating with cryptographic webhook verification
-- 📱 **Mobile-First PWA** – Optimized for Coinbase Wallet with deep linking and installability
-- 🛡️ **Enterprise Security** – Access control, event logging, comprehensive testing, CI/CD
+- 📱 **Mobile-First PWA** – Optimized for Coinbase Wallet with deep linking
 
 > ⚠️ **Risk Disclosure**: This system handles real value on mainnet. Review [docs/disclosures.md](https://unykornai.github.io/sge/disclosures.html) for vesting schedules, market risks, and compliance requirements before deployment.
 
@@ -119,13 +179,21 @@ sge-eth-one-swoop/
 
 ---
 
-## Quick start (complete runnable steps)
+## 🚀 Quick Start
+
+### Mode Matrix
+
+| Mode | Command | DB/Redis | Workers | Purpose |
+|------|---------|:--------:|:-------:|----------|
+| **Mock** (default) | `npm run dev` | ❌ | ❌ | Fork-and-run, zero external deps |
+| **Real** | `npm run setup:real && npm run dev:real` | ✅ | ✅ | Production-like with full stack |
 
 ### Prerequisites
 
 * Node.js 18+
 * npm 9+
-* Ethereum mainnet RPC URL (Alchemy, Infura, etc.)
+* Docker (only for Real mode)
+* Ethereum mainnet RPC URL (Alchemy, Infura - only for Real mode)
 
 - **Docs:** https://unykornai.github.io/sge/
 - **Status:** [STATUS.md](./STATUS.md)

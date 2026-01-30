@@ -13,7 +13,11 @@ let _signer: ethers.Wallet | null = null;
 export function getSigner(): ethers.Wallet {
   if (!_signer) {
     try {
-      _signer = new ethers.Wallet(env.RELAYER_PRIVATE_KEY, provider);
+      if (env.MOCK_MODE) {
+        _signer = new ethers.Wallet(env.RELAYER_PRIVATE_KEY);
+      } else {
+        _signer = new ethers.Wallet(env.RELAYER_PRIVATE_KEY, provider);
+      }
     } catch (e: any) {
       throw new Error(
         `Invalid RELAYER_PRIVATE_KEY. Please configure a valid private key in .env\n` +
@@ -40,6 +44,9 @@ export const publicClient = createPublicClient({
  * Verify we're on mainnet
  */
 export async function verifyMainnet(): Promise<void> {
+  if (env.MOCK_MODE) {
+    return;
+  }
   const network = await provider.getNetwork();
   if (network.chainId !== 1n) {
     throw new Error(
@@ -68,6 +75,11 @@ export function etherscanTx(hash: string): string {
  */
 export async function initEvm(): Promise<void> {
   logger.info('Initializing EVM service...');
+
+  if (env.MOCK_MODE) {
+    logger.info('MOCK_MODE enabled: skipping mainnet checks');
+    return;
+  }
   
   await verifyMainnet();
   

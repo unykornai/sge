@@ -1,308 +1,433 @@
-# Quick Start Guide
+# Getting Started with SGE
 
-Get the SGE claim system running in **under 5 minutes** - no mainnet keys required!
+> **Fork, run, and explore the enterprise settlement platform in under 5 minutes**
 
-## 🚀 Fork-and-Run (Mock Mode)
-
-This repo works out of the box in **MOCK_MODE** with no blockchain connection.
-
-### Prerequisites
-
-- **Node.js 18+** ([download](https://nodejs.org))
-- **npm 9+** (comes with Node.js)
-- **Git** ([download](https://git-scm.com))
-
-### One-Command Setup
-
-**Windows (PowerShell):**
-```powershell
-git clone https://github.com/unykornai/sge.git
-cd sge
-.\scripts\bootstrap.ps1
-```
-
-**macOS/Linux:**
+::: tip Quick Start
 ```bash
+# One command to rule them all
 git clone https://github.com/unykornai/sge.git
 cd sge
-chmod +x scripts/bootstrap.sh
-./scripts/bootstrap.sh
+./scripts/bootstrap.sh  # or bootstrap.ps1 on Windows
+npm run dev
+```
+Then open http://localhost:5173
+:::
+
+---
+
+## Understanding the Modes
+
+SGE runs in **four distinct modes** depending on your use case:
+
+### 1. 📱 Pages Demo (GitHub Pages)
+
+**What**: Static website with simulated backend workflows  
+**When**: Demonstrating platform capabilities to investors/partners  
+**Requirements**: None (it's just HTML/CSS/JS)  
+**Data**: Deterministic mock data that resets on page refresh  
+**URL**: https://unykornai.github.io/sge/
+
+**Perfect for**:
+- Showing the UX without infrastructure
+- Explaining workflows in presentations
+- Testing frontend changes before backend deployment
+
+::: info NOTE
+The Pages demo simulates everything: affiliates, settlements, commissions, payouts. It's a fully functional workflow simulator with no backend required.
+:::
+
+---
+
+### 2. 🚀 Local Mock Mode (Default)
+
+**What**: Full app + API running locally with in-memory storage  
+**When**: Frontend development, rapid iteration, learning the codebase  
+**Requirements**: Node.js 18+ only (no Docker, no DB, no RPC, no wallets)  
+**Data**: Resets when you stop the server  
+**Config**: `MOCK_MODE=true` (default in `.env`)
+
+**Perfect for**:
+- First-time contributors
+- UI/UX development
+- Testing new features without blockchain
+- Running on low-spec machines (works on a laptop)
+
+**What's Mocked**:
+- ✅ Database (in-memory Map storage)
+- ✅ Redis queue (instant job processing)
+- ✅ Ethereum RPC (no real blockchain calls)
+- ✅ Wallets (no private keys needed)
+- ✅ Coinbase Commerce (simulated payments)
+
+**Start Command**:
+```bash
+npm run dev
+# Runs: API (port 3000) + Workers + App (port 5173)
 ```
 
-**What it does:**
-- ✅ Installs all dependencies
-- ✅ Builds shared packages
-- ✅ Creates `.env` files with `MOCK_MODE=true`
-- ✅ Runs smoke tests
+---
 
-### Start Development
+### 3. 🏢 Local Real Mode (Enterprise Stack)
+
+**What**: Full production-like environment with Postgres, Redis, and mainnet RPC  
+**When**: Backend development, testing workers, preparing for production  
+**Requirements**: Docker, funded relayer wallet, RPC endpoint  
+**Data**: Persists in Postgres (survives restarts)  
+**Config**: `MOCK_MODE=false` in `packages/api/.env`
+
+**Perfect for**:
+- Testing settlement flows end-to-end
+- Worker queue development
+- Database schema changes
+- Integration testing with real contracts
+
+**What's Real**:
+- ✅ Postgres database (Docker)
+- ✅ Redis queue (Docker, BullMQ)
+- ✅ Ethereum mainnet RPC (Alchemy/Infura)
+- ✅ Real wallet signatures
+- ⚠️ Coinbase Commerce (optional, requires API key)
+
+**Setup Steps**:
+
+1. **Start infrastructure**:
+   ```bash
+   npm run db:up
+   npm run prisma:push
+   npm run prisma:generate
+   ```
+
+2. **Generate wallets** (or use existing):
+   ```bash
+   npm run wallet:new
+   # Outputs: DEPLOYER, RELAYER, TREASURY addresses + keys
+   ```
+
+3. **Fund the RELAYER** (for gasless transactions):
+   - Send ~0.5 ETH to the RELAYER_ADDRESS
+   - This pays for transaction gas
+
+4. **Edit `packages/api/.env`**:
+   ```bash
+   MOCK_MODE=false
+   ETH_RPC_HTTPS=https://eth-mainnet.g.alchemy.com/v2/YOUR_KEY
+   RELAYER_ADDRESS=0x...
+   RELAYER_PRIVATE_KEY=0x...
+   ```
+
+5. **Start everything**:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+### 4. 🌐 Production (Live Mainnet)
+
+**What**: Deployed to cloud with load balancing, monitoring, and backups  
+**When**: Serving real users and processing real settlements  
+**Requirements**: Everything from Real Mode + monitoring/alerts/backups  
+**Data**: Backed up hourly, replicated across regions  
+**Config**: Production `.env` with strict security
+
+**Additional Requirements**:
+- ✅ Cold storage for DEPLOYER and TREASURY wallets
+- ✅ 2-person approval for payouts (PAYOUT_APPROVER_1 + PAYOUT_APPROVER_2)
+- ✅ Monitoring (Sentry, Datadog, or similar)
+- ✅ Alerting (Slack/Discord webhooks)
+- ✅ Database backups (daily + point-in-time recovery)
+- ✅ SSL certificates
+- ✅ Rate limiting
+- ✅ DDoS protection
+
+::: danger SECURITY
+Never commit private keys to Git. Use environment variables or secret management services (AWS Secrets Manager, HashiCorp Vault, etc.).
+:::
+
+---
+
+##  Start Development
 
 ```bash
 npm run dev
 ```
 
 Opens:
-- **API**: http://localhost:3000 (mock blockchain responses)
-- **App**: http://localhost:5173 (claim UI)
-
-Try the demo:
-1. Enter any Ethereum address (e.g., `0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb`)
-2. Click through the steps - all simulated!
-3. See mock transaction hashes and responses
-
-### View Documentation
-
-```bash
-npm run docs:dev
-```
-
-Opens: http://localhost:5175/sge/
+- **API**: http://localhost:3000 (enterprise endpoints)
+- **App**: http://localhost:5173 (full UI)
 
 ---
 
-## 🌐 Real Mainnet Mode
+##  Docker Services
 
-Want to deploy on Ethereum mainnet? Here's how:
-
-### Step 1: Generate Wallets
+The platform uses PostgreSQL and Redis for enterprise features:
 
 ```bash
-npm run wallet:new
+# Start infrastructure
+npm run db:up
+
+# View logs
+npm run db:logs
+
+# Stop infrastructure  
+npm run db:down
+
+# Reset database (destructive!)
+npm run db:reset
 ```
 
-**Output:**
-```
-DEPLOYER Wallet:
-Address: 0x1234...
-Private Key: 0xabcd...
+### Docker Compose Services
 
-RELAYER Wallet:
-Address: 0x5678...
-Private Key: 0xef01...
-```
+| Service | Port | Description |
+|---------|------|-------------|
+| Postgres | 5432 | Primary database |
+| Redis | 6379 | Job queues + caching |
+| Adminer | 8080 | Database UI (debug profile) |
+| Redis Commander | 8081 | Redis UI (debug profile) |
 
-⚠️ **NEVER commit these keys to Git!**
-
-### Step 2: Fund Wallets
-
-- **DEPLOYER**: Needs ~0.05 ETH for contract deployment
-- **RELAYER**: Needs ~0.5 ETH for gasless minting operations
-
-Send mainnet ETH to these addresses.
-
-### Step 3: Configure Environment
-
-Edit `packages/api/.env`:
-
+To access debug tools:
 ```bash
-# Set to false to use real blockchain
-MOCK_MODE=false
-
-# Your mainnet RPC (get from Alchemy, Infura, or Ankr)
-ETH_RPC_HTTPS=https://eth-mainnet.g.alchemy.com/v2/YOUR_API_KEY
-
-# Paste private key from wallet:new (include 0x prefix)
-RELAYER_PRIVATE_KEY=0xabcd...
-
-# After deployment, update these:
-SGEID_ADDRESS=0x...
-SGE_TOKEN=0x40489719E489782959486A04B765E1E93E5B221a
-SGE_CLAIM=0x4BFeF695a5f85a65E1Aa6015439f317494477D09
-
-# Mainnet token addresses (verified)
-USDC=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-USDT=0xdAC17F958D2ee523a2206206994597C13D831ec7
-
-# Feature gates
-KYC_REQUIRED=false
-COMMERCE_REQUIRED=false
-FEE_USD=100
-```
-
-### Step 4: Deploy Contracts
-
-```bash
-cd packages/contracts
-npx hardhat run scripts/deploy.js --network mainnet
-```
-
-**Copy deployed addresses** to `packages/api/.env` and `packages/shared/src/config/addresses.ts`.
-
-### Step 5: Start Production Services
-
-```bash
-# Build all packages
-npm run build
-
-# Start with PM2 (production)
-pm2 start ecosystem.config.js
-
-# Or start manually (development)
-npm run dev
-```
-
-### Step 6: Verify Deployment
-
-```bash
-curl http://localhost:3000/healthz
-```
-
-**Expected response:**
-```json
-{
-  "ok": true,
-  "chainId": 1,
-  "blockNumber": 19105234,
-  "signerAddress": "0x742d35...",
-  "hasSgeidCode": true,
-  "hasClaimCode": true
-}
+docker-compose -f docker-compose.dev.yml --profile debug up -d
 ```
 
 ---
 
-## 🧪 Testing
-
-### Run All Tests
+##  Prisma Commands
 
 ```bash
+# Generate Prisma client
+npm run prisma:generate
+
+# Push schema to database
+npm run prisma:push
+
+# Create migration
+npm run prisma:migrate
+
+# Open Prisma Studio
+npm run prisma:studio
+```
+
+---
+
+##  Workers
+
+Background job processing:
+
+```bash
+# Start workers in dev mode
+npm run worker:dev
+```
+
+Workers handle:
+- **Intent Processing** - Registration, claims
+- **Payout Processing** - Commission payouts
+- **Reconciliation** - Nightly ledger checks
+
+---
+
+##  Demo Mode (GitHub Pages)
+
+The app can run entirely in the browser with **no backend**:
+
+1. Set environment:
+```bash
+VITE_DEMO_MODE=true
+```
+
+2. Build and deploy:
+```bash
+npm run build -w @sge/app
+# Deploy dist/ to GitHub Pages
+```
+
+Demo mode uses MSW (Mock Service Worker) to simulate all API responses.
+
+---
+
+##  Environment Configuration
+
+### API (.env)
+
+```bash
+# Mode
+MOCK_MODE=true              # true = in-memory, false = real DB
+
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/sge_dev
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Blockchain
+RPC_URL=https://eth.llamarpc.com
+
+# Wallets (generate with: npm run wallet:new)
+DEPLOYER_ADDRESS=0x...
+DEPLOYER_PRIVATE_KEY=0x...
+RELAYER_ADDRESS=0x...
+RELAYER_PRIVATE_KEY=0x...
+TREASURY_ADDRESS=0x...
+
+# Contracts
+SGEID_CONTRACT_ADDRESS=0x...
+SGE_TOKEN_ADDRESS=0x...
+CLAIM_VAULT_ADDRESS=0x...
+
+# Coinbase Commerce
+COINBASE_COMMERCE_API_KEY=your-key
+COINBASE_COMMERCE_WEBHOOK_SECRET=your-secret
+
+# Admin
+ADMIN_API_KEY=change-in-production
+```
+
+### App (.env)
+
+```bash
+VITE_API_URL=http://localhost:3000
+VITE_MOCK_MODE=true
+VITE_DEMO_MODE=false
+VITE_CHAIN_ID=1
+```
+
+---
+
+##  Enterprise API (v2)
+
+The v2 API provides database-backed enterprise features:
+
+### Programs
+```bash
+POST /api/v2/programs           # Create program
+GET  /api/v2/programs           # List programs
+GET  /api/v2/programs/:id       # Get program
+```
+
+### Affiliates
+```bash
+POST /api/v2/affiliates/register    # Register affiliate
+GET  /api/v2/affiliates/tree        # Get downline tree
+GET  /api/v2/affiliates/:id/stats   # Get stats
+```
+
+### Intent-Based Operations
+```bash
+POST /api/v2/users/register     # Register (queued)
+POST /api/v2/claims             # Claim (queued)
+GET  /api/v2/claims/:id         # Check status
+```
+
+### Payouts (2-Person Approval)
+```bash
+POST /api/v2/payouts/batch              # Create batch
+POST /api/v2/payouts/batch/:id/approve  # Approve (person 1)
+POST /api/v2/payouts/batch/:id/execute  # Execute (person 2)
+```
+
+### Admin
+```bash
+GET  /api/v2/enterprise/ledger/balance  # Ledger balances
+GET  /api/v2/enterprise/audit           # Audit log
+POST /api/v2/enterprise/reconcile       # Run reconciliation
+```
+
+---
+
+##  Admin Portals
+
+### Affiliate Portal
+Access at: http://localhost:5173/affiliate
+
+- View downline tree
+- Track commissions
+- Performance charts
+
+### Admin Portal  
+Access at: http://localhost:5173/admin
+
+- System metrics
+- User management
+- Payout approval
+
+### Reconciliation Dashboard
+Access at: http://localhost:5173/reconciliation
+
+- Stuck intents monitoring
+- Missing receipt alerts
+- Ledger balance verification
+
+---
+
+##  Testing
+
+```bash
+# All tests
 npm test
-```
 
-### Test Specific Package
+# Contracts only
+npm run test:contracts
 
-```bash
-npm test -w @sge/contracts  # Hardhat tests
-npm test -w @sge/api        # API tests
-npm run typecheck           # TypeScript checks
-```
+# API type checking
+npm test -w @sge/api
 
-### Contracts Only (Windows Fix)
-
-```bash
-# Windows users: use cross-env wrapper
-npm run test:contracts:raw
+# TypeScript validation
+npm run typecheck
 ```
 
 ---
 
-## 📦 Repository Structure
-
-```
-sge/
-├── packages/
-│   ├── shared/       # ABIs, addresses, types
-│   ├── contracts/    # Solidity + Hardhat
-│   ├── api/          # Express backend
-│   ├── app/          # React + Vite PWA
-│   └── docs/         # VitePress docs
-├── scripts/
-│   ├── bootstrap.ps1 # Windows setup
-│   ├── bootstrap.sh  # macOS/Linux setup
-│   └── wallet-new.mjs # Wallet generator
-├── LICENSE-MIT       # MIT License
-├── LICENSE-APACHE    # Apache 2.0 License
-├── TRADEMARKS.md     # Brand usage policy
-└── DCO.md            # Contributor terms
-```
-
----
-
-## 🔄 Development Workflow
-
-### 1. Make Changes
-
-```bash
-# Create feature branch
-git checkout -b feat/my-feature
-
-# Make changes
-code packages/api/src/routes/register.ts
-
-# Test changes
-npm test
-
-# Commit with sign-off (required)
-git commit -s -m "feat: add feature"
-```
-
-### 2. Submit Pull Request
-
-- ✅ All commits must have `Signed-off-by` (see [DCO.md](../DCO.md))
-- ✅ Pass CI checks (tests, typecheck, build)
-- ✅ Update docs if needed
-- ✅ Follow [CONTRIBUTING.md](../.github/CONTRIBUTING.md)
-
-### 3. Code Review
-
-Maintainers will review and may request changes.
-
----
-
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### "Cannot find module '@sge/shared'"
-
 ```bash
-# Rebuild shared package
-npm run build -w @sge/shared
+npm run build:shared
 ```
 
-### "Port 3000 already in use"
-
+### "Database connection failed"
 ```bash
-# Kill existing process
-# Windows:
-Get-Process -Name node | Stop-Process -Force
-
-# macOS/Linux:
-killall node
+npm run db:up
+# Wait 3 seconds for Postgres to start
+npm run prisma:push
 ```
 
-### Hardhat Tests Fail on Windows
-
-Use the cross-env wrapper:
+### "Redis connection refused"
 ```bash
-npm run test:contracts:raw
+npm run db:up
 ```
 
-### "RELAYER_PRIVATE_KEY invalid"
-
-- Ensure it starts with `0x`
-- Must be 66 characters (0x + 64 hex digits)
-- Generate new: `npm run wallet:new`
+### Port conflicts
+```bash
+# Check what is using ports
+netstat -ano | findstr :3000
+netstat -ano | findstr :5432
+```
 
 ---
 
-## 📚 Additional Resources
-
-- **[Architecture Diagrams](https://unykornai.github.io/sge/diagrams/)** - System design
-- **[API Documentation](https://unykornai.github.io/sge/api/)** - Endpoints and schemas
-- **[Contract Docs](https://unykornai.github.io/sge/contracts/)** - Solidity reference
-- **[Risk Register](https://unykornai.github.io/sge/ops/risk.html)** - Known threats
-- **[Compliance](https://unykornai.github.io/sge/disclosures.html)** - Legal disclosures
-
----
-
-## 🆘 Getting Help
-
-- **💬 Discussions**: https://github.com/unykornai/sge/discussions
-- **🐛 Issues**: https://github.com/unykornai/sge/issues
-- **📧 Email**: [your-email]
-
----
-
-## ⚡ Quick Commands Reference
+##  Quick Commands Reference
 
 | Command | Purpose |
 |---------|---------|
-| `npm run dev` | Start API + App (dev mode) |
-| `npm run build` | Build all packages |
-| `npm test` | Run all tests |
+| `npm run dev` | Start API + App |
+| `npm run db:up` | Start Docker services |
+| `npm run db:down` | Stop Docker services |
+| `npm run prisma:generate` | Generate Prisma client |
+| `npm run prisma:push` | Push schema to DB |
+| `npm run prisma:studio` | Open database UI |
+| `npm run worker:dev` | Start job workers |
 | `npm run docs:dev` | Start docs server |
-| `npm run wallet:new` | Generate new wallets |
-| `npm run typecheck` | TypeScript validation |
+| `npm run wallet:new` | Generate wallets |
 
 ---
 
-**Ready to contribute?** Read [CONTRIBUTING.md](../.github/CONTRIBUTING.md) and [DCO.md](../DCO.md)!
+##  Resources
+
+- **[Architecture](./architecture/overview.md)** - System design
+- **[Enterprise Features](./architecture/enterprise.md)** - Affiliate, commissions
+- **[Runbook](./ops/runbook.md)** - Operations guide
+- **[API Reference](./api/)** - Endpoint docs
+
+---
+
+**Ready to contribute?** Read [CONTRIBUTING.md](../.github/CONTRIBUTING.md)!
