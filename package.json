@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "sge-eth-one-swoop",
   "version": "1.0.0",
   "private": true,
@@ -15,7 +15,7 @@
     "lint": "echo 'Lint not configured yet'",
     "clean": "npm run clean -ws --if-present",
     "wallet:new": "node scripts/wallet-new.mjs",
-    "test": "echo 'Tests not configured yet'"
+    "test": "npm run test -w @sge/contracts"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
