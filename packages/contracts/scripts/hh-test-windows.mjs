@@ -1,39 +1,40 @@
 import { execSync } from "node:child_process";
 
-const isWin = process.platform === "win32";
-
-let exitCode = 0;
-let output = "";
+function run(cmd) {
+  return execSync(cmd, { stdio: "pipe", encoding: "utf8" });
+}
 
 try {
-  output = execSync("npx hardhat test", {
-    encoding: "utf-8",
-    stdio: ["inherit", "pipe", "pipe"],
-    env: process.env,
-  });
-  console.log(output);
-} catch (error) {
-  exitCode = error.status ?? 1;
-  output = (error.stdout ?? "") + "\n" + (error.stderr ?? "");
-  console.log(error.stdout ?? "");
-  console.error(error.stderr ?? "");
-}
+  // npx resolves correctly in workspaces; cmd name differs on Windows
+  const npx = process.platform === "win32" ? "npx.cmd" : "npx";
+  const output = run(`${npx} hardhat test`);
 
-const combined = output.toLowerCase();
+  // Print normal output
+  process.stdout.write(output);
 
-// Hardhat prints a summary like "19 passing"
-const passed = /\bpassing\b/.test(combined) && !/\bfailing\b/.test(combined);
-
-// This is the noisy Windows shutdown symptom
-const windowsShutdownGlitch =
-  combined.includes("assertion failed") ||
-  combined.includes("async handle") ||
-  combined.includes("uv_loop") ||
-  combined.includes("terminate process");
-
-if (isWin && exitCode !== 0 && passed && windowsShutdownGlitch) {
-  console.warn("\n[hh-test] Windows Hardhat shutdown glitch detected. Tests passed; forcing exit 0.\n");
+  // If we got here, exit code was 0
   process.exit(0);
-}
+} catch (e) {
+  const stdout = e?.stdout?.toString?.() ?? "";
+  const stderr = e?.stderr?.toString?.() ?? "";
+  const combined = (stdout + "\n" + stderr).toLowerCase();
 
-process.exit(exitCode);
+  // Always print what Hardhat printed
+  if (stdout) process.stdout.write(stdout);
+  if (stderr) process.stderr.write(stderr);
+
+  const passed = /\bpassing\b/.test(combined) && !/\bfailing\b/.test(combined);
+  const windowsShutdownGlitch =
+    combined.includes("assertion failed") ||
+    combined.includes("async handle") ||
+    combined.includes("uv_loop") ||
+    combined.includes("terminate process");
+
+  if (process.platform === "win32" && passed && windowsShutdownGlitch) {
+    console.warn("\n[hh-test] Windows shutdown glitch detected. Tests passed; forcing exit 0.\n");
+    process.exit(0);
+  }
+
+  // Preserve real failures
+  process.exit(typeof e?.status === "number" ? e.status : 1);
+}
