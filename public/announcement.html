@@ -57,24 +57,115 @@
     }
     .footer {
       margin-top: 32px;
-      font-size: 0.95rem;
-      color: #7A8C84;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>SGE System Update</h1>
-    <div class="msg">
-      The SGE platform has been upgraded and the main API site at <b>http://localhost:4444</b> is now hosted elsewhere.<br>
-      <br>
-      Please use the new SGE system and demo site below for all current features and updates.
-    </div>
-    <a class="site-link" href="https://unykornai.github.io/sge/demo/" target="_blank">Visit SGE Demo Site</a>
-    <div class="footer">
-      For questions or support, contact your SGE administrator.<br>
-      &copy; 2026 Super Green Energy Corp
-    </div>
-  </div>
-</body>
-</html>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>SGE — MAINNET LIVE</title>
+        <style>
+          :root{--bg:#0A0F0D;--card:#111916;--muted:#7A8C84;--accent-green:#00A651;--accent-gold:#F7B32B;--text:#FFFFFF}
+          html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,system-ui;background:linear-gradient(180deg,var(--bg),#071009);color:var(--text);display:flex;align-items:center;justify-content:center}
+          .wrap{width:920px;max-width:96%;padding:28px;border-radius:14px;background:linear-gradient(180deg,rgba(17,25,22,0.9),rgba(10,14,13,0.85));box-shadow:0 12px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.02)}
+          header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+          .brand{display:flex;align-items:center;gap:14px}
+          .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent-green),var(--accent-gold));display:flex;align-items:center;justify-content:center;font-weight:900;color:#071009}
+          h1{font-size:20px;margin:0}
+          .subtitle{color:var(--muted);font-size:13px}
+          .actions{display:flex;gap:10px;align-items:center}
+          .btn{padding:10px 14px;border-radius:8px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+          .btn.green{background:linear-gradient(90deg,var(--accent-green),#39B54A);color:#071009}
+          .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
+          main{display:grid;grid-template-columns:1fr 360px;gap:20px}
+          .panel{background:var(--card);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+          .lead{font-size:16px;font-weight:700;margin-bottom:8px}
+          .muted{color:var(--muted)}
+          .wallets{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+          .wallet{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;font-weight:700}
+          .mint{margin-top:14px}
+          .input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);font-family:monospace}
+          .mint-btn{margin-top:10px;background:linear-gradient(90deg,var(--accent-green),var(--accent-gold));padding:12px;border-radius:10px;color:#071009;font-weight:800;border:none;cursor:pointer}
+          .status-list{display:flex;flex-direction:column;gap:8px}
+          .status-item{display:flex;justify-content:space-between;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
+          .warning{color:#F59E0B}
+          footer{margin-top:16px;color:var(--muted);font-size:13px;text-align:center}
+          @media(max-width:980px){main{grid-template-columns:1fr}.actions{flex-wrap:wrap}}
+        </style>
+      </head>
+      <body>
+        <div class="wrap">
+          <header>
+            <div class="brand">
+              <div class="logo">SGE</div>
+              <div>
+                <h1>🟢 MAINNET LIVE — Real Ethereum transactions</h1>
+                <div class="subtitle">SGE Energy • Gasless Minting • Ethereum Mainnet Only</div>
+              </div>
+            </div>
+            <div class="actions">
+              <a class="btn green" href="http://localhost:5173/">Open App</a>
+              <a class="btn ghost" href="/">Status</a>
+            </div>
+          </header>
+
+          <main>
+            <section class="panel">
+              <div class="lead">⚡ SGE Energy</div>
+              <div class="muted">Wallets supported: Coinbase Wallet · Phantom · MetaMask · Uniswap Extension</div>
+
+              <div class="wallets">
+                <div class="wallet">Register</div>
+                <div class="wallet">Claim</div>
+                <div class="wallet">Status</div>
+                <div class="wallet">Affiliate</div>
+                <div class="wallet">Admin</div>
+              </div>
+
+              <div class="mint">
+                <div class="muted">Ethereum Address</div>
+                <input class="input" placeholder="0x... Paste your address or connect a wallet" />
+                <button class="mint-btn">⚡ Mint SGE-ID (Free)</button>
+                <p class="muted" style="margin-top:10px">Transaction will be submitted by the relayer. You'll receive an Etherscan link. Gasless minting powered by a relayer. You pay $0 gas.</p>
+              </div>
+
+              <h3 style="margin-top:18px">What is SGE-ID?</h3>
+              <ul class="muted">
+                <li>SGE-ID is your identity NFT on Ethereum mainnet.</li>
+                <li>One per wallet (anti-duplication)</li>
+                <li>Required to access SGE claim features</li>
+                <li>Non-custodial, wallet-owned. Mint is gas-sponsored (relayer pays)</li>
+              </ul>
+            </section>
+
+            <aside class="panel">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <strong>Live System Status</strong>
+                <span class="muted">View Full System Status →</span>
+              </div>
+
+              <div class="status-list">
+                <div class="status-item"><span>Network:</span><span class="warning">Offline</span></div>
+                <div class="status-item"><span>Relayer:</span><span class="warning">Offline</span></div>
+                <div class="status-item"><span>RPC:</span><span class="warning">Unhealthy</span></div>
+                <div class="status-item"><span>Contract:</span><span class="warning">Unreachable</span></div>
+              </div>
+
+              <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,0.02);padding-top:12px">
+                <strong>Important Disclosures</strong>
+                <p class="muted" style="margin-top:8px">36-Month Rewards Period: Rewards vest over 36 months; distribution schedule may vary by market conditions.</p>
+                <p class="muted">Market Risk: Digital assets are volatile. Participate only with funds you can afford to lose.</p>
+                <p class="muted">KYC/Compliance: Verification may be required depending on jurisdiction, volume, or payment method.</p>
+                <p class="muted">Mainnet Only: This app supports Ethereum mainnet only. No testnets.</p>
+              </div>
+
+              <div style="margin-top:12px;font-size:13px;color:var(--muted)">Etherscan • Coinbase Wallet</div>
+              <div style="margin-top:10px;color:var(--muted);font-size:12px">© 2026 SGE Energy. All rights reserved.</div>
+            </aside>
+          </main>
+
+          <footer>
+            Serving local demo at <a href="http://localhost:5173/" style="color:var(--accent-green)">http://localhost:5173/</a>
+          </footer>
+        </div>
+      </body>
+      </html>
