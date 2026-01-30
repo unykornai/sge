@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGE System Update Announcement</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0A0F0D 0%, #00A651 100%);
+      color: #fff;
+      font-family: 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: rgba(17, 25, 22, 0.95);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,166,81,0.15);
+      padding: 40px 32px;
+      max-width: 480px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+      background: linear-gradient(90deg, #00A651 0%, #F7B32B 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .msg {
+      font-size: 1.15rem;
+      margin-bottom: 24px;
+      color: #B4C4BC;
+    }
+    .site-link {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #00A651 0%, #F7B32B 100%);
+      color: #111916;
+      text-decoration: none;
+      box-shadow: 0 2px 8px rgba(0,166,81,0.12);
+      transition: background 0.2s;
+    }
+    .site-link:hover {
+      background: linear-gradient(90deg, #39B54A 0%, #FFD966 100%);
+      color: #0A0F0D;
+    }
+    .footer {
+      margin-top: 32px;
+      font-size: 0.95rem;
+      color: #7A8C84;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SGE System Update</h1>
+    <div class="msg">
+      The SGE platform has been upgraded and the main API site at <b>http://localhost:4444</b> is now hosted elsewhere.<br>
+      <br>
+      Please use the new SGE system and demo site below for all current features and updates.
+    </div>
+    <a class="site-link" href="https://unykornai.github.io/sge/demo/" target="_blank">Visit SGE Demo Site</a>
+    <div class="footer">
+      For questions or support, contact your SGE administrator.<br>
+      &copy; 2026 Super Green Energy Corp
+    </div>
+  </div>
+</body>
+</html>
