@@ -13,7 +13,7 @@
 
 <br />
 
-[**🌐 Live Demo**](https://unykornai.github.io/sge/demo/) &nbsp;•&nbsp; [**📖 Documentation**](https://unykornai.github.io/sge/) &nbsp;•&nbsp; [**📊 Status**](https://unykornai.github.io/sge/demo/#/status)
+[**🌐 Live Demo**](https://unykornai.github.io/sge/app/) &nbsp;•&nbsp; [**📖 Documentation**](https://unykornai.github.io/sge/) &nbsp;•&nbsp; [**📊 Status**](https://unykornai.github.io/sge/app/#/status)
 
 <br />
 
@@ -298,7 +298,7 @@ pm2 monit
 
 The demo automatically deploys on push to `main`:
 
-**Live URL**: https://unykornai.github.io/sge/demo/
+**Live URL**: https://unykornai.github.io/sge/app/
 
 ---
 
