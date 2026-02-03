@@ -2,9 +2,9 @@
 
 ## Executive Summary
 
-The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement system** that handles gasless NFT identity minting and stablecoin-to-token claims at scale. It's designed for production deployment but currently exists in a **completely dormant, zero-risk state** because no operational private keys are loaded or wallets funded.
+The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement system** that handles gasless NFT identity minting and stablecoin-to-token claims at scale. It's designed for production deployment but currently exists in a **completely dormant state with no operational risk** because no operational private keys are loaded or wallets funded.
 
-**Key Fact**: Nothing can happen. No transactions can be executed. No funds can move. The system is architecturally safe by design.
+**Key Fact**: No transactions can execute without explicit activation. No funds can move. The system is architecturally safe by design.
 
 ---
 
@@ -46,7 +46,7 @@ The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement
 - **Idempotency**: Prevents duplicate operations
 - **Rate Limiting**: Abuse prevention (5/hr register, 60/hr claims)
 - **Background Workers**: Async processing with BullMQ
-- **Double-Entry Ledger**: Perfect settlement guarantees
+- **Double-Entry Ledger**: Designed to guarantee correct settlement under defined operating conditions
 - **Observability**: Prometheus metrics, OpenTelemetry
 - **Security**: Helmet headers, CORS, input validation
 
@@ -94,7 +94,7 @@ The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement
 
 ---
 
-## Current State: Complete Dormancy & Zero Risk
+## Current State: Complete Dormancy & No Operational Risk
 
 ### 🔒 **Why Nothing Can Happen**
 
@@ -121,7 +121,7 @@ The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement
 **✅ No Funds Can Be Moved**:
 - Treasury wallets are empty
 - No operational keys are loaded
-- Contracts have no admin withdrawal functions
+- Contracts do not permit arbitrary fund withdrawal and require explicit, key-based authorization for any privileged actions
 
 **✅ No Transactions Can Execute**:
 - Relayer is not running
@@ -152,7 +152,7 @@ The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement
 
 **Technical Excellence**:
 - Zero duplicate transactions (idempotency)
-- Perfect settlement guarantees (double-entry)
+- Designed to guarantee correct settlement under defined operating conditions (double-entry)
 - Automatic failure recovery (reconciliation)
 - Comprehensive testing and verification
 
@@ -166,7 +166,7 @@ The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement
 
 **Safe Dormancy**:
 - Can remain offline indefinitely
-- No maintenance required
+- No active operational maintenance required while dormant
 - No financial exposure
 - No operational risk
 
@@ -186,7 +186,7 @@ The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement
 
 ## Wallet & Key Inventory (Complete Transparency)
 
-### 🔑 **Keys We Possess: NONE**
+### 🔑 **No Operational Keys Are Loaded Into Any Runtime or Funded For Use**
 
 **Relayer Wallet**: Not generated or loaded
 **Treasury Wallets**: Not funded or controlled
@@ -211,19 +211,17 @@ The SGE Energy platform is a **fully-built, enterprise-grade Ethereum settlement
 
 ## Final Confirmation: System Is Completely Safe
 
-**You possess nothing that enables system operation.**
+**No operational keys are loaded into any runtime.**
 
-**No private keys are loaded.**
-
-**No wallets are funded.**
+**No wallets are funded for use.**
 
 **No automatic processes are running.**
 
-**The system cannot execute transactions.**
+**No transactions can execute without explicit activation.**
 
-**No funds can be moved.**
+**No funds can be moved without key-based authorization.**
 
-**No users can be impacted.**
+**No users can be impacted in the current configuration.**
 
 **You retain 100% control over activation.**
 
