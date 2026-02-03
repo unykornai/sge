@@ -44,7 +44,7 @@
     "dev:ensure": "powershell -ExecutionPolicy Bypass -File scripts/ensure-dev.ps1 -KillExisting"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
+    "concurrently": "^9.2.1",
     "typescript": "^5.3.3"
   },
   "engines": {
