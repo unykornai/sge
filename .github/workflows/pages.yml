@@ -26,11 +26,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
 
       - name: Install
-        run: npm ci
+        run: npm install --legacy-peer-deps
+
+      - name: Build shared
+        run: npm run build -w @sge/shared
 
       - name: Build docs
         run: npm run docs:build
