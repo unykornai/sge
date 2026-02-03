@@ -8,6 +8,9 @@ hero:
   tagline: Professional docs with flow diagrams, runbooks, and CI-ready commands.
   actions:
     - theme: brand
+      text: Launch App
+      link: /app/
+    - theme: alt
       text: Quickstart
       link: /guide/quickstart
     - theme: alt
