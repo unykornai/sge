@@ -37,18 +37,29 @@ const withDelay = async <T>(data: T, ms = 300): Promise<T> => {
 
 export const handlers = [
   // =========================================================================
-  // Health Check
+  // Health Check (matches both /healthz and /api/healthz)
   // =========================================================================
   http.get('*/healthz', async () => {
     return HttpResponse.json(await withDelay({
-      status: 'ok',
+      ok: true,
+      chainId: 1,
+      blockNumber: 19500000 + Math.floor(Math.random() * 1000),
+      relayerBalance: '0.5',
+      relayerLowBalance: false,
       mode: 'demo',
       timestamp: new Date().toISOString(),
-      services: {
-        database: 'mock',
-        redis: 'mock',
-        blockchain: 'mock',
-      },
+    }));
+  }),
+
+  http.get('*/api/healthz', async () => {
+    return HttpResponse.json(await withDelay({
+      ok: true,
+      chainId: 1,
+      blockNumber: 19500000 + Math.floor(Math.random() * 1000),
+      relayerBalance: '0.5',
+      relayerLowBalance: false,
+      mode: 'demo',
+      timestamp: new Date().toISOString(),
     }));
   }),
 

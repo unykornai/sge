@@ -16,10 +16,13 @@ export async function initDemoMode(): Promise<void> {
 
   const { worker } = await import('./browser');
   
+  // Use base path from env or default to root
+  const base = import.meta.env.BASE_URL || '/';
+  
   await worker.start({
     onUnhandledRequest: 'bypass', // Don't mock unhandled requests (static assets, etc.)
     serviceWorker: {
-      url: '/mockServiceWorker.js',
+      url: `${base}mockServiceWorker.js`,
     },
   });
 
