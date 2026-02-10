@@ -14,7 +14,7 @@
   "dependencies": {
     "@sge/shared": "*",
     "@tanstack/react-query": "^5.17.19",
-    "@wagmi/connectors": "^4.1.0",
+    "@wagmi/connectors": "^7.1.6",
     "lucide-react": "^0.563.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
